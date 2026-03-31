@@ -1,0 +1,51 @@
+﻿using DataIngestor.Domain.Abstractions;
+using DataIngestor.Infrastructure.Configurations.Models;
+using DataIngestor.Infrastructure.Configurations.Providers;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Polly;
+using Polly.Extensions.Http;
+
+namespace DataIngestor.Infrastructure;
+
+public static class InfrastructureDependencyRegistrar
+{
+    public static void AddInfrastructureDependencies(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddHttpClient<IWeakApiClient, WeakApiClient>(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(10);
+        }).AddPolicyHandler(GetRetryPolicy());
+
+        services.AddSingleton<IMessagePublisher, RabbitMqPublisher>();
+
+        services.Configure<RabbitMqConfig>(configuration.GetSection(RabbitMqConfig.SectionName));
+        services.Configure<WeakApiConfig>(configuration.GetSection(WeakApiConfig.SectionName));
+        
+        services.AddSingleton<IRabbitMqConfigProvider, RabbitMqConfigProvider>();
+        services.AddSingleton<IWeakApiConfigProvider, WeakApiConfigProvider>();
+    }
+
+    private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+    {
+        return HttpPolicyExtensions
+            .HandleTransientHttpError()
+            .Or<TaskCanceledException>()
+            .Or<HttpRequestException>()
+            .Or<HttpIOException>()
+            .WaitAndRetryAsync(5, retryAttempt => 
+                TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                onRetry: (outcome, timespan, retryAttempt, context) =>
+                {
+                    var message = outcome.Exception is TaskCanceledException 
+                        ? "Превышен таймаут ожидания (Timeout)" 
+                        : outcome.Exception?.Message ?? outcome.Result?.StatusCode.ToString();
+
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine($"[Retry {retryAttempt}] Коннект не удался: {message}. Повтор через {timespan.TotalSeconds:N1}с.");
+                    Console.ResetColor();
+                });
+    }
+}
