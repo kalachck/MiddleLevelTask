@@ -10,6 +10,8 @@ namespace DataIngestor.Infrastructure;
 
 public class RabbitMqPublisher : IMessagePublisher, IAsyncDisposable
 {
+    private readonly List<string> types = ["energy", "air_quality", "motion"];
+    
     private readonly RabbitMqConfig _config;
     private readonly ConnectionFactory _connectionFactory;
     private IConnection? _connection;
@@ -64,16 +66,13 @@ public class RabbitMqPublisher : IMessagePublisher, IAsyncDisposable
             type: ExchangeType.Topic,
             durable: true);
 
-        await _channel.QueueDeclareAsync(
-            queue: _config.QueueName,
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null);
-        
-        await _channel.QueueBindAsync(
-            queue: _config.QueueName,
-            exchange: _config.ExchangeName,
-            routingKey: _config.RoutingKeyPattern);
+        foreach (var type in types)
+        {
+            var queueName = $"{_config.QueueName}.{type}";
+            var routingKey = $"{_config.RoutingKeyPattern}.{type}";
+            
+            await _channel.QueueDeclareAsync(queueName, durable: true, exclusive: false, autoDelete: false);
+            await _channel.QueueBindAsync(queueName, _config.ExchangeName, routingKey);
+        }
     }
 }
