@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using DataIngestor.Domain.Abstractions;
 using DataIngestor.Domain.Models;
 using DataIngestor.Infrastructure.Configurations.Models;
@@ -40,7 +41,10 @@ public class RabbitMqPublisher : IMessagePublisher, IAsyncDisposable
         var json = JsonSerializer.Serialize(sensorReading);
         var body = Encoding.UTF8.GetBytes(json);
         
-        var routingKey = $"sensors.{sensorReading.Type.ToString().ToLower()}";
+        var typeName = sensorReading.Type.ToString();
+        var snakeCaseType = Regex.Replace(typeName, "(?<=.)([A-Z])", "_$1").ToLower();
+        
+        var routingKey = $"sensors.{snakeCaseType}";
 
         await _channel!.BasicPublishAsync(
             exchange: _config.ExchangeName,
