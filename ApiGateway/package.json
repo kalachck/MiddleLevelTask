@@ -1,0 +1,29 @@
+{
+  "name": "apigateway",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --loader ts-node/esm src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@fastify/cors": "^11.2.0",
+    "@types/node": "^25.5.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.2"
+  },
+  "dependencies": {
+    "@clickhouse/client": "^1.18.2",
+    "dotenv": "^17.4.1",
+    "fastify": "^5.8.4",
+    "graphql": "^16.13.2",
+    "mercurius": "^16.9.0",
+    "pino-pretty": "^13.1.3"
+  }
+}
