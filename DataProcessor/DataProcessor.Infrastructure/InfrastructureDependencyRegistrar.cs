@@ -26,15 +26,15 @@ public static class InfrastructureDependencyRegistrar
 
     private static IServiceCollection AddRabbitMq(this IServiceCollection services)
     {
-        // services.AddHostedService(sp => new RabbitMqConsumer<MotionProcessingService>(
-        //     queueName: "sensors_queue.motion",
-        //     channelProvider: sp.GetRequiredService<IRabbitMqChannelProvider>(),
-        //     sp));
+        services.AddHostedService(sp => new RabbitMqConsumer<MotionProcessingService>(
+            queueName: "sensors_queue.motion",
+            channelProvider: sp.GetRequiredService<IRabbitMqChannelProvider>(),
+            sp));
 
-        // services.AddHostedService(sp => new RabbitMqConsumer<EnergyProcessingService>(
-        //     queueName: "sensors_queue.energy",
-        //     channelProvider: sp.GetRequiredService<IRabbitMqChannelProvider>(),
-        //     sp));
+        services.AddHostedService(sp => new RabbitMqConsumer<EnergyProcessingService>(
+            queueName: "sensors_queue.energy",
+            channelProvider: sp.GetRequiredService<IRabbitMqChannelProvider>(),
+            sp));
         
         services.AddHostedService(sp => new RabbitMqConsumer<AirQualityProcessingService>(
             queueName: "sensors_queue.air_quality",
