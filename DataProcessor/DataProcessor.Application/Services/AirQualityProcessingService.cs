@@ -11,14 +11,17 @@ public class AirQualityProcessingService : IReadingProcessingService
 {
     private readonly IAirQualityRepository _airQualityRepository;
     private readonly IMapper<AirQualityReadingDto, AirQualityReadingEntity> _mapper;
+    private readonly ISensorNotificationService _notificationService;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
 
     public AirQualityProcessingService(
         IAirQualityRepository airQualityRepository,
-        IMapper<AirQualityReadingDto, AirQualityReadingEntity> mapper)
+        IMapper<AirQualityReadingDto, AirQualityReadingEntity> mapper,
+        ISensorNotificationService notificationService)
     {
         _airQualityRepository = airQualityRepository;
         _mapper = mapper;
+        _notificationService = notificationService;
 
         _jsonSerializerOptions = new JsonSerializerOptions
         {
@@ -32,5 +35,7 @@ public class AirQualityProcessingService : IReadingProcessingService
                          ??  throw new InvalidOperationException("Cannot deserialize a null air quality reading!");
         
         await _airQualityRepository.AddAsync(_mapper.Map(airQuality), ct);
+        
+        await _notificationService.NotifyAirQualityProcessedAsync(airQuality, ct);
     }
 }

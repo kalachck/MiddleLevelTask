@@ -18,6 +18,12 @@ services:
     volumes:
       - rabbitmq-lib:/var/lib/rabbitmq/
       - rabbitmq-log:/var/log/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   clickhouse:
     image: clickhouse/clickhouse-server:latest
@@ -30,6 +36,42 @@ services:
       - CLICKHOUSE_PASSWORD=admin_pass
     volumes:
       - ch_data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  data-ingestor:
+    build:
+      context: ./DataIngestor
+      dockerfile: Dockerfile
+    container_name: data-ingestor
+    environment:
+      ASPNETCORE_ENVIRONMENT: docker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      weak-app:
+        condition: service_started
+    restart: unless-stopped
+
+  data-processor:
+    build:
+      context: ./DataProcessor
+      dockerfile: Dockerfile
+    container_name: data-processor
+    ports:
+      - "5136:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: docker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   rabbitmq-lib:

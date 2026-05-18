@@ -10,11 +10,14 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("docker"))
 {
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsEnvironment("docker"))
+{
+    app.UseHttpsRedirection();
+}
 
 app.Run();

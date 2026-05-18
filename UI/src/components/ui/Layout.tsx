@@ -1,11 +1,12 @@
 import { Outlet, NavLink } from 'react-router-dom';
 import { Zap, Wind, Activity, LayoutDashboard } from 'lucide-react';
+import ConnectionStatus from './ConnectionStatus';
 
 const Layout = () => {
   const navItems = [
-    { to: '/energy', label: 'Энергия', icon: <Zap size={20} /> },
-    { to: '/air-quality', label: 'Воздух', icon: <Wind size={20} /> },
-    { to: '/motion', label: 'Движение', icon: <Activity size={20} /> },
+    { to: '/energy', label: 'Energy', icon: <Zap size={20} /> },
+    { to: '/air-quality', label: 'Air Quality', icon: <Wind size={20} /> },
+    { to: '/motion', label: 'Motion', icon: <Activity size={20} /> },
   ];
 
   return (
@@ -34,6 +35,8 @@ const Layout = () => {
             </NavLink>
           ))}
         </nav>
+
+        <ConnectionStatus />
       </aside>
 
       <main className="flex-1 overflow-y-auto bg-slate-50 p-8 min-h-screen">
