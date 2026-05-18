@@ -1,39 +1,36 @@
 import MotionChart from '../components/dashboard/MotionChart';
+import { SENSOR_LOCATIONS } from '../constants/locations';
+import { usePageDateRange } from '../hooks/usePageDateRange';
+import { useSensorNotificationsContext } from '../signalr/SensorNotificationsContext';
 
 const MotionPage = () => {
-  const locations = [
-    "Office", 
-    "Living Room", 
-    "Kitchen", 
-    "Corridor", 
-    "Bedroom", 
-    "Garage"
-  ];
-
-  const to = new Date().toISOString();
-// eslint-disable-next-line react-hooks/purity
-const from = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+  const { from, to } = usePageDateRange('motion');
+  const { motionEvents } = useSensorNotificationsContext();
+  const liveCount = motionEvents.length;
 
   return (
     <div className="space-y-8">
       <header className="flex justify-between items-end">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900">Датчики движения</h1>
-          <p className="text-slate-500 mt-2">Анализ частоты активности и присутствия в зонах</p>
+          <p className="text-slate-500 mt-2">
+            Анализ активности · live-статус через SignalR
+          </p>
         </div>
-        <div className="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-bold">
-          Всего датчиков: {locations.length}
+        <div className="text-right">
+          <div className="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-bold">
+            Всего датчиков: {SENSOR_LOCATIONS.length}
+          </div>
+          {liveCount > 0 && (
+            <p className="mt-1 text-xs text-emerald-600 font-medium">{liveCount} live events</p>
+          )}
         </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {locations.map((loc) => (
+        {SENSOR_LOCATIONS.map((loc) => (
           <div key={loc} className="hover:shadow-md transition-shadow duration-300 rounded-2xl">
-            <MotionChart 
-              location={loc} 
-              from={from} 
-              to={to} 
-            />
+            <MotionChart location={loc} from={from} to={to} />
           </div>
         ))}
       </div>

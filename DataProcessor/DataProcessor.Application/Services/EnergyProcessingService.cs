@@ -12,14 +12,17 @@ public class EnergyProcessingService : IReadingProcessingService
 {
     private readonly IEnergyRepository _energyRepository;
     private readonly IMapper<EnergyReadingDto, EnergyReadingEntity> _mapper;
+    private readonly ISensorNotificationService _notificationService;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
 
     public EnergyProcessingService(
         IEnergyRepository energyRepository,
-        IMapper<EnergyReadingDto, EnergyReadingEntity> mapper)
+        IMapper<EnergyReadingDto, EnergyReadingEntity> mapper,
+        ISensorNotificationService notificationService)
     {
         _energyRepository = energyRepository;
         _mapper = mapper;
+        _notificationService = notificationService;
 
         _jsonSerializerOptions = new JsonSerializerOptions
         {
@@ -33,5 +36,7 @@ public class EnergyProcessingService : IReadingProcessingService
                      ?? throw new InvalidOperationException("Cannot deserialize a null energy reading!");
         
         await _energyRepository.AddAsync(_mapper.Map(energy), ct);
+
+        await _notificationService.NotifyEnergyProcessedAsync(energy, ct);
     }
 }

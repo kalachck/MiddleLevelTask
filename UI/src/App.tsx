@@ -3,10 +3,12 @@ import EnergyPage from './pages/EnergyPage';
 import AirQualityPage from './pages/AirQualityPage';
 import MotionPage from './pages/MotionPage';
 import Layout from './components/ui/Layout';
+import { SensorNotificationsProvider } from './signalr/SensorNotificationsContext';
 
 function App() {
   return (
     <BrowserRouter>
+      <SensorNotificationsProvider>
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/energy" replace />} />
@@ -16,6 +18,7 @@ function App() {
           <Route path="motion" element={<MotionPage />} />
         </Route>
       </Routes>
+      </SensorNotificationsProvider>
     </BrowserRouter>
   );
 }

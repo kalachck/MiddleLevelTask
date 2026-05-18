@@ -4,14 +4,19 @@ using DataProcessor.Infrastructure.ClickHouse;
 using DataProcessor.Infrastructure.RabbitMq;
 using DataProcessor.Infrastructure.RabbitMq.Providers;
 using DataProcessor.Infrastructure.Repositories;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DataProcessor.Infrastructure;
 
 public static class InfrastructureDependencyRegistrar
 {
-    public static void AddInfrastructureDependencies(this IServiceCollection services)
+    public static void AddInfrastructureDependencies(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
+        services.Configure<RabbitMqConfig>(configuration.GetSection(RabbitMqConfig.SectionName));
+
         services
             .AddRabbitMq()
             .AddDatabaseDependencies();
