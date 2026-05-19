@@ -1,4 +1,4 @@
-// Общий тип для параметров запроса
+// Shared query parameter types
 export interface QueryVars {
   location: string;
   from: string;
@@ -30,7 +30,7 @@ export interface MotionData {
   aggregateMotion: MotionStat[];
 }
 
-// Переиспользуем твои существующие Energy типы
+// Energy aggregation types
 export interface EnergyStat {
   timeBucket: string;
   totalEnergy: number;

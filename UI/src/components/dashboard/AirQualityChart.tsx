@@ -26,7 +26,7 @@ const AirQualityChart: React.FC<Props> = ({ location, from, to }) => {
   const { data, loading, error, refetch } = useQuery<AirQualityData, QueryVars>(
     AGGREGATE_AIR_QUALITY,
     {
-      variables: { location, from, to, interval: '1 hour' },
+      variables: { location, from, to, interval: '1 minute' },
       fetchPolicy: 'network-only',
       nextFetchPolicy: 'cache-first',
     },

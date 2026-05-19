@@ -26,7 +26,7 @@ const EnergyChart: React.FC<Props> = ({ location, from, to }) => {
   const { data, loading, error, refetch } = useQuery<EnergyStatsData, QueryVars>(
     AGGREGATE_ENERGY,
     {
-      variables: { location, from, to, interval: '1 hour' },
+      variables: { location, from, to, interval: '1 minute' },
       fetchPolicy: 'network-only',
       nextFetchPolicy: 'cache-first',
     },

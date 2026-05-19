@@ -26,7 +26,7 @@ const MotionChart: React.FC<Props> = ({ location, from, to }) => {
   const { data, loading, error, refetch } = useQuery<MotionData, QueryVars>(
     AGGREGATE_MOTION,
     {
-      variables: { location, from, to, interval: '1 hour' },
+      variables: { location, from, to, interval: '1 minute' },
       fetchPolicy: 'network-only',
       nextFetchPolicy: 'cache-first',
     },
@@ -37,7 +37,7 @@ const MotionChart: React.FC<Props> = ({ location, from, to }) => {
   if (loading && !data) {
     return (
       <div className="h-72 flex items-center justify-center bg-slate-50 rounded-xl border border-slate-100 animate-pulse">
-        <span className="text-slate-400">Загрузка...</span>
+        <span className="text-slate-400">Loading...</span>
       </div>
     );
   }
@@ -45,20 +45,20 @@ const MotionChart: React.FC<Props> = ({ location, from, to }) => {
   if (error) {
     return (
       <div className="h-72 flex items-center justify-center text-red-500 border border-red-200 rounded-lg bg-red-50">
-        Ошибка: {error.message}
+        Error: {error.message}
       </div>
     );
   }
 
   const chartData = data?.aggregateMotion.map((item) => ({
     ...item,
-    label: new Date(item.timeBucket).toLocaleTimeString([], { hour: '2-digit' }),
+    label: new Date(item.timeBucket).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   })) ?? [];
 
   return (
     <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200 w-full">
       <div className="flex justify-between items-center mb-2">
-        <h3 className="text-lg font-semibold text-slate-800">Активность движения — {location}</h3>
+        <h3 className="text-lg font-semibold text-slate-800">Motion activity — {location}</h3>
         {loading && <span className="text-xs text-slate-400">Updating…</span>}
       </div>
 
@@ -98,7 +98,7 @@ const MotionChart: React.FC<Props> = ({ location, from, to }) => {
               dataKey="eventCount"
               fill="#8b5cf6"
               radius={[4, 4, 0, 0]}
-              name="Событий за час"
+              name="Events in minute"
             />
           </BarChart>
         </ResponsiveContainer>
