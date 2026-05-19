@@ -3,7 +3,7 @@ using DataIngestor.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddApplicationDependencies();
+builder.Services.AddApplicationDependencies(builder.Configuration);
 builder.Services.AddInfrastructureDependencies(builder.Configuration);
 
 builder.Services.AddOpenApi();

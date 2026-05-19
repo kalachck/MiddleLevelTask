@@ -12,13 +12,13 @@ const EnergyPage = () => {
     <div className="space-y-8">
       <header className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900">Мониторинг электроэнергии</h1>
+          <h1 className="text-3xl font-extrabold text-slate-900">Energy monitoring</h1>
           <p className="text-slate-500 mt-2">
-            История из GraphQL · обновления в реальном времени через SignalR
+            History from GraphQL · real-time updates via SignalR
           </p>
         </div>
         <div className="text-right text-sm text-slate-500">
-          <p>Локаций: {SENSOR_LOCATIONS.length}</p>
+          <p>Locations: {SENSOR_LOCATIONS.length}</p>
           {liveCount > 0 && (
             <p className="text-emerald-600 font-medium">{liveCount} live events buffered</p>
           )}

@@ -12,14 +12,14 @@ const MotionPage = () => {
     <div className="space-y-8">
       <header className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900">Датчики движения</h1>
+          <h1 className="text-3xl font-extrabold text-slate-900">Motion sensors</h1>
           <p className="text-slate-500 mt-2">
-            Анализ активности · live-статус через SignalR
+            Activity analysis · live status via SignalR
           </p>
         </div>
         <div className="text-right">
           <div className="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-bold">
-            Всего датчиков: {SENSOR_LOCATIONS.length}
+            Total sensors: {SENSOR_LOCATIONS.length}
           </div>
           {liveCount > 0 && (
             <p className="mt-1 text-xs text-emerald-600 font-medium">{liveCount} live events</p>

@@ -13,13 +13,13 @@
   "license": "ISC",
   "type": "module",
   "devDependencies": {
-    "@fastify/cors": "^11.2.0",
     "@types/node": "^25.5.2",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.2"
   },
   "dependencies": {
     "@clickhouse/client": "^1.18.2",
+    "@fastify/cors": "^11.2.0",
     "dotenv": "^17.4.1",
     "fastify": "^5.8.4",
     "graphql": "^16.13.2",

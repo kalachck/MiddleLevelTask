@@ -40,11 +40,11 @@ public static class InfrastructureDependencyRegistrar
                 onRetry: (outcome, timespan, retryAttempt, context) =>
                 {
                     var message = outcome.Exception is TaskCanceledException 
-                        ? "Превышен таймаут ожидания (Timeout)" 
+                        ? "Request timeout exceeded (Timeout)" 
                         : outcome.Exception?.Message ?? outcome.Result?.StatusCode.ToString();
 
                     Console.ForegroundColor = ConsoleColor.Cyan;
-                    Console.WriteLine($"[Retry {retryAttempt}] Коннект не удался: {message}. Повтор через {timespan.TotalSeconds:N1}с.");
+                    Console.WriteLine($"[Retry {retryAttempt}] Connection failed: {message}. Retrying in {timespan.TotalSeconds:N1}s.");
                     Console.ResetColor();
                 });
     }
