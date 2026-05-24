@@ -4,8 +4,20 @@ using DataProcessor.Infrastructure;
 using DataProcessor.Presentation.Hubs;
 using DataProcessor.Presentation.Middlewares;
 using DataProcessor.Presentation.SignalR.Services;
+using Serilog;
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
+
+Log.Information("Starting Data Processor");
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext());
 
 builder.Services.AddOpenApi();
 builder.Services.AddSignalR();
@@ -34,10 +46,14 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("docker"))
 
 app.UseCors("UiDev");
 
+app.UseSerilogRequestLogging();
+
 app.UseMiddleware<HubAuthMiddleware>();
 
 app.MapHub<SensorsHub>("/hubs/sensors");
 
 app.Services.AddInfrastructureAppDependencies();
+
+Log.Information("Data Processor listening on {Urls}", string.Join(", ", app.Urls));
 
 app.Run();

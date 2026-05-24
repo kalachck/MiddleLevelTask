@@ -1,5 +1,5 @@
 import * as signalR from '@microsoft/signalr';
-import { useSensorNotificationsContext } from '../../signalr/SensorNotificationsContext';
+import { useSensorNotificationsContext } from '../../signalr/useSensorNotificationsContext';
 
 const labels: Record<signalR.HubConnectionState, string> = {
   [signalR.HubConnectionState.Connected]: 'Live',

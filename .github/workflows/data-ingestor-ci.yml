@@ -2,16 +2,19 @@ name: Data Ingestor CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
     paths:
       - 'DataIngestor/**'
+      - '.github/workflows/data-ingestor-ci.yml'
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
     paths:
       - 'DataIngestor/**'
+      - '.github/workflows/data-ingestor-ci.yml'
+  workflow_dispatch:
 
 jobs:
-  build-end-test:
+  build-and-test:
     runs-on: ubuntu-latest
     defaults:
       run:
