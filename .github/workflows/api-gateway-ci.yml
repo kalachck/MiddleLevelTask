@@ -2,16 +2,19 @@ name: Api Gateway CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
     paths:
       - 'ApiGateway/**'
+      - '.github/workflows/api-gateway-ci.yml'
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
     paths:
       - 'ApiGateway/**'
+      - '.github/workflows/api-gateway-ci.yml'
+  workflow_dispatch:
 
 jobs:
-  build-end-test:
+  build-and-test:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -21,11 +24,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js v24
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: 'npm'
+          cache: npm
           cache-dependency-path: ApiGateway/package-lock.json
 
       - name: Install dependencies

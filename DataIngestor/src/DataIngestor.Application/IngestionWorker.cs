@@ -1,5 +1,6 @@
 ﻿using DataIngestor.Application.Configurations.Models;
 using DataIngestor.Domain.Abstractions;
+using DataIngestor.Domain.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -33,23 +34,48 @@ public class IngestionWorker : BackgroundService
                 $"{IngestionOptions.SectionName}:{nameof(IngestionOptions.Interval)} must be greater than zero.");
         }
 
-        _logger.LogInformation("Ingestion polling interval: {Interval}", _pollingInterval);
+        _logger.LogInformation("Ingestion worker started; polling interval {Interval}", _pollingInterval);
         using var timer = new PeriodicTimer(_pollingInterval);
 
         do
         {
             try
             {
-                var data = await _weakApiClient.FetchReadingsAsync(stoppingToken);
-                foreach (var reading in data)
+                _logger.LogDebug("Starting ingestion poll cycle");
+
+                var readings = (await _weakApiClient.FetchReadingsAsync(stoppingToken)).ToList();
+
+                if (readings.Count == 0)
                 {
-                    await _messagePublisher.PublishAsync(reading, stoppingToken);
+                    _logger.LogDebug("No readings returned from weak API this cycle");
+                    continue;
                 }
+
+                _logger.LogInformation("Fetched {ReadingCount} readings from weak API", readings.Count);
+
+                foreach (var reading in readings)
+                {
+                    await PublishReadingAsync(reading, stoppingToken);
+                }
+
+                _logger.LogInformation(
+                    "Ingestion cycle completed: published {ReadingCount} readings",
+                    readings.Count);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _logger.LogError(e, "An error occured while retrieving readings");
+                _logger.LogError(ex, "Ingestion poll cycle failed");
             }
         } while (await timer.WaitForNextTickAsync(stoppingToken));
+    }
+
+    private async Task PublishReadingAsync(SensorReading reading, CancellationToken ct)
+    {
+        _logger.LogDebug(
+            "Publishing {SensorType} reading for {Location}",
+            reading.Type,
+            reading.Name);
+
+        await _messagePublisher.PublishAsync(reading, ct);
     }
 }

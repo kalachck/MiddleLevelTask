@@ -1,17 +1,20 @@
-name: Data Ingestor CI
+name: Data Processor CI
 
 on:
   push:
-    branches: [ "main" ]
-    paths:
-      - 'DataIngestor/**'
-  pull_request:
-    branches: [ "main" ]
+    branches: [main]
     paths:
       - 'DataProcessor/**'
+      - '.github/workflows/data-processor.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'DataProcessor/**'
+      - '.github/workflows/data-processor.yml'
+  workflow_dispatch:
 
 jobs:
-  build-end-test:
+  build-and-test:
     runs-on: ubuntu-latest
     defaults:
       run:

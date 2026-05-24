@@ -38,7 +38,9 @@ export function useSensorNotifications(
   const [allEvents, setAllEvents] = useState<SensorRealtimeEvent[]>([]);
   const hubKeyRef = useRef(hubKey);
 
-  hubKeyRef.current = hubKey;
+  useEffect(() => {
+    hubKeyRef.current = hubKey;
+  }, [hubKey]);
 
   useEffect(() => {
     const connection = new signalR.HubConnectionBuilder()

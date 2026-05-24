@@ -6,6 +6,7 @@ using DataProcessor.Infrastructure.RabbitMq.Providers;
 using DataProcessor.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DataProcessor.Infrastructure;
 
@@ -25,8 +26,13 @@ public static class InfrastructureDependencyRegistrar
     public static void AddInfrastructureAppDependencies(this IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
+        var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>()
+            .CreateLogger("DataProcessor.Infrastructure");
         var databaseInitializer = scope.ServiceProvider.GetRequiredService<IClickHouseInitializer>();
-        databaseInitializer.InitializeAsync();
+
+        logger.LogInformation("Running ClickHouse schema initialization");
+        databaseInitializer.InitializeAsync().GetAwaiter().GetResult();
+        logger.LogInformation("ClickHouse schema initialization completed");
     }
 
     private static IServiceCollection AddRabbitMq(this IServiceCollection services)
@@ -34,17 +40,20 @@ public static class InfrastructureDependencyRegistrar
         services.AddHostedService(sp => new RabbitMqConsumer<MotionProcessingService>(
             queueName: "sensors_queue.motion",
             channelProvider: sp.GetRequiredService<IRabbitMqChannelProvider>(),
-            sp));
+            sp,
+            sp.GetRequiredService<ILogger<RabbitMqConsumer<MotionProcessingService>>>()));
 
         services.AddHostedService(sp => new RabbitMqConsumer<EnergyProcessingService>(
             queueName: "sensors_queue.energy",
             channelProvider: sp.GetRequiredService<IRabbitMqChannelProvider>(),
-            sp));
-        
+            sp,
+            sp.GetRequiredService<ILogger<RabbitMqConsumer<EnergyProcessingService>>>()));
+
         services.AddHostedService(sp => new RabbitMqConsumer<AirQualityProcessingService>(
             queueName: "sensors_queue.air_quality",
             channelProvider: sp.GetRequiredService<IRabbitMqChannelProvider>(),
-            sp));
+            sp,
+            sp.GetRequiredService<ILogger<RabbitMqConsumer<AirQualityProcessingService>>>()));
         
         services.AddSingleton<IRabbitMqConfigProvider, RabbitMqConfigProvider>();
         services.AddSingleton<IRabbitMqChannelProvider, RabbitMqChannelProvider>();

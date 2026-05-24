@@ -91,11 +91,48 @@ const AirQualityChart: React.FC<Props> = ({ location, from, to }) => {
               tickLine={false}
               tick={{ fill: '#94a3b8', fontSize: 10 }}
             />
-            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10 }} />
+            <YAxis
+              yAxisId="co2"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#94a3b8', fontSize: 10 }}
+            />
+            <YAxis
+              yAxisId="pmHumidity"
+              orientation="right"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#94a3b8', fontSize: 10 }}
+            />
             <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
             <Legend verticalAlign="top" align="right" wrapperStyle={{ paddingBottom: '20px' }} />
-            <Line type="monotone" dataKey="avgCo2" stroke="#ef4444" strokeWidth={3} dot={false} />
-            <Line type="monotone" dataKey="avgHumidity" stroke="#3b82f6" strokeWidth={3} dot={false} />
+            <Line
+              yAxisId="co2"
+              type="monotone"
+              dataKey="avgCo2"
+              name="CO₂ (avg)"
+              stroke="#ef4444"
+              strokeWidth={3}
+              dot={false}
+            />
+            <Line
+              yAxisId="pmHumidity"
+              type="monotone"
+              dataKey="avgPm25"
+              name="PM2.5 (avg)"
+              stroke="#f59e0b"
+              strokeWidth={3}
+              dot={false}
+            />
+            <Line
+              yAxisId="pmHumidity"
+              type="monotone"
+              dataKey="avgHumidity"
+              name="Humidity (avg)"
+              stroke="#3b82f6"
+              strokeWidth={3}
+              dot={false}
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>
