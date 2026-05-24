@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import { AGGREGATE_AIR_QUALITY } from '../../graphql/queries';
 import type { AirQualityData, QueryVars } from '../../types/sensor';
-import { useSensorNotificationsContext } from '../../signalr/SensorNotificationsContext';
+import { useSensorNotificationsContext } from '../../signalr/useSensorNotificationsContext';
 import { latestForLocation } from '../../signalr/selectors';
 import { useRefetchOnNotification } from '../../hooks/useRefetchOnNotification';
 import LiveReadingBanner from './LiveReadingBanner';

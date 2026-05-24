@@ -1,7 +1,7 @@
 import EnergyChart from '../components/dashboard/EnergyChart';
 import { SENSOR_LOCATIONS } from '../constants/locations';
 import { usePageDateRange } from '../hooks/usePageDateRange';
-import { useSensorNotificationsContext } from '../signalr/SensorNotificationsContext';
+import { useSensorNotificationsContext } from '../signalr/useSensorNotificationsContext';
 
 const EnergyPage = () => {
   const { from, to } = usePageDateRange('energy');

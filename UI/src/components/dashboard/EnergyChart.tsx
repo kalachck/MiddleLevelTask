@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import { AGGREGATE_ENERGY } from '../../graphql/queries';
 import type { EnergyStatsData, QueryVars } from '../../types/sensor';
-import { useSensorNotificationsContext } from '../../signalr/SensorNotificationsContext';
+import { useSensorNotificationsContext } from '../../signalr/useSensorNotificationsContext';
 import { latestForLocation } from '../../signalr/selectors';
 import { useRefetchOnNotification } from '../../hooks/useRefetchOnNotification';
 import LiveReadingBanner from './LiveReadingBanner';

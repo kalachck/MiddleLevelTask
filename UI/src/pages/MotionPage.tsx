@@ -1,7 +1,7 @@
 import MotionChart from '../components/dashboard/MotionChart';
 import { SENSOR_LOCATIONS } from '../constants/locations';
 import { usePageDateRange } from '../hooks/usePageDateRange';
-import { useSensorNotificationsContext } from '../signalr/SensorNotificationsContext';
+import { useSensorNotificationsContext } from '../signalr/useSensorNotificationsContext';
 
 const MotionPage = () => {
   const { from, to } = usePageDateRange('motion');
