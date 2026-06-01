@@ -87,7 +87,6 @@ export const resolvers = {
         },
 
         // --- AGGREGATION QUERIES (Graphics) ---
-
         aggregateAirQuality: async (_: any, { location, from, to, interval }: any) => {
             const query = `
                 SELECT 

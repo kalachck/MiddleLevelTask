@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Logging;
 
-namespace DataProcessor.Presentation.Hubs;
+namespace DataProcessor.Presentation.SignalR.Hubs;
 
 public class SensorsHub : Hub
 {

@@ -1,5 +1,6 @@
 using DataIngestor.Application;
 using DataIngestor.Infrastructure;
+using DataIngestor.Presentation.Middlewares;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -18,6 +19,8 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
 builder.Services.AddApplicationDependencies(builder.Configuration);
 builder.Services.AddInfrastructureDependencies(builder.Configuration);
 
+builder.Services.AddTransient<GlobalExceptionHandlerMiddleware>();
+
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -33,6 +36,8 @@ if (!app.Environment.IsEnvironment("docker"))
 }
 
 app.UseSerilogRequestLogging();
+
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 Log.Information("Data Ingestor listening on {Urls}", string.Join(", ", app.Urls));
 

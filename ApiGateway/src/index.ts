@@ -40,10 +40,10 @@ const start = async () => {
     await app.listen({ port, host });
 
     console.log(`
-            🚀 API Gateway is ready!
-            📡 GraphQL: http://localhost:${port}/graphql
-            🛠 IDE (GraphiQL): http://localhost:${port}/graphiql
-            🏥 Health: http://localhost:${port}/health
+            API Gateway is ready!
+            GraphQL: http://localhost:${port}/graphql
+            IDE (GraphiQL): http://localhost:${port}/graphiql
+            Health: http://localhost:${port}/health
         `);
   } catch (error) {
     app.log.error(error);
