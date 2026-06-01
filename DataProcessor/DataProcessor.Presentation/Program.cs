@@ -1,8 +1,8 @@
 using DataProcessor.Application;
 using DataProcessor.Application.Interfaces.Services;
 using DataProcessor.Infrastructure;
-using DataProcessor.Presentation.Hubs;
 using DataProcessor.Presentation.Middlewares;
+using DataProcessor.Presentation.SignalR.Hubs;
 using DataProcessor.Presentation.SignalR.Services;
 using Serilog;
 
@@ -31,6 +31,7 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod());
 });
 
+builder.Services.AddTransient<GlobalExceptionHandlerMiddleware>();
 builder.Services.AddTransient<HubAuthMiddleware>();
 builder.Services.AddScoped<ISensorNotificationService, SignalRNotificationService>();
 
@@ -47,6 +48,8 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("docker"))
 app.UseCors("UiDev");
 
 app.UseSerilogRequestLogging();
+
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 app.UseMiddleware<HubAuthMiddleware>();
 

@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataIngestor.Infrastructure
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataIngestor.Application", "src\DataIngestor.Application\DataIngestor.Application.csproj", "{9CB6B6F9-C5E2-4BA1-8013-C77325E791AA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataIngestor.Tests", "DataIngestor.Tests\DataIngestor.Tests.csproj", "{63D98B24-9489-4C06-B999-B7322EF59F29}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{9CB6B6F9-C5E2-4BA1-8013-C77325E791AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9CB6B6F9-C5E2-4BA1-8013-C77325E791AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9CB6B6F9-C5E2-4BA1-8013-C77325E791AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63D98B24-9489-4C06-B999-B7322EF59F29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63D98B24-9489-4C06-B999-B7322EF59F29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63D98B24-9489-4C06-B999-B7322EF59F29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63D98B24-9489-4C06-B999-B7322EF59F29}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -1,6 +1,6 @@
 ﻿using DataProcessor.Application.Dtos;
 using DataProcessor.Application.Interfaces.Services;
-using DataProcessor.Presentation.Hubs;
+using DataProcessor.Presentation.SignalR.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 

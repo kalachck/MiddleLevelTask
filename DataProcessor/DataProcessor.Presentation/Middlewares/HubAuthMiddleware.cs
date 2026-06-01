@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-
-namespace DataProcessor.Presentation.Middlewares;
+﻿namespace DataProcessor.Presentation.Middlewares;
 
 public class HubAuthMiddleware : IMiddleware
 {
