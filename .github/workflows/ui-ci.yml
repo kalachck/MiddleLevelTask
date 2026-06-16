@@ -3,18 +3,8 @@ name: UI CI
 on:
   push:
     branches: [main]
-    paths:
-      - 'UI/**'
-      - '.github/workflows/ui-ci.yml'
-      - '.github/workflows/ui-deploy.yml'
-      - '.github/workflows/reusable-*.yml'
   pull_request:
     branches: [main]
-    paths:
-      - 'UI/**'
-      - '.github/workflows/ui-ci.yml'
-      - '.github/workflows/ui-deploy.yml'
-      - '.github/workflows/reusable-*.yml'
   workflow_dispatch:
 
 jobs:

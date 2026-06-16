@@ -3,18 +3,8 @@ name: Api Gateway CI
 on:
   push:
     branches: [main]
-    paths:
-      - 'ApiGateway/**'
-      - '.github/workflows/api-gateway-ci.yml'
-      - '.github/workflows/api-gateway-deploy.yml'
-      - '.github/workflows/reusable-*.yml'
   pull_request:
     branches: [main]
-    paths:
-      - 'ApiGateway/**'
-      - '.github/workflows/api-gateway-ci.yml'
-      - '.github/workflows/api-gateway-deploy.yml'
-      - '.github/workflows/reusable-*.yml'
   workflow_dispatch:
 
 jobs:
