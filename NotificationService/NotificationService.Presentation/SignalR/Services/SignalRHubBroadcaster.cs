@@ -1,19 +1,18 @@
-﻿using DataProcessor.Application.Dtos;
-using DataProcessor.Application.Interfaces.Services;
-using DataProcessor.Presentation.SignalR.Hubs;
+using NotificationService.Application.Dtos;
+using NotificationService.Application.Interfaces;
+using NotificationService.Presentation.SignalR.Hubs;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Logging;
 
-namespace DataProcessor.Presentation.SignalR.Services;
+namespace NotificationService.Presentation.SignalR.Services;
 
-public class SignalRNotificationService : ISensorNotificationService
+public class SignalRHubBroadcaster : ISensorHubBroadcaster
 {
     private readonly IHubContext<SensorsHub> _hubContext;
-    private readonly ILogger<SignalRNotificationService> _logger;
+    private readonly ILogger<SignalRHubBroadcaster> _logger;
 
-    public SignalRNotificationService(
+    public SignalRHubBroadcaster(
         IHubContext<SensorsHub> hubContext,
-        ILogger<SignalRNotificationService> logger)
+        ILogger<SignalRHubBroadcaster> logger)
     {
         _hubContext = hubContext;
         _logger = logger;

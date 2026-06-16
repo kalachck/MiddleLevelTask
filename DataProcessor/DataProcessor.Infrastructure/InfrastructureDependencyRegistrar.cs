@@ -1,4 +1,5 @@
 ﻿using DataProcessor.Application.Interfaces.Repositories;
+using DataProcessor.Application.Interfaces.Services;
 using DataProcessor.Application.Services;
 using DataProcessor.Infrastructure.ClickHouse;
 using DataProcessor.Infrastructure.RabbitMq;
@@ -17,6 +18,7 @@ public static class InfrastructureDependencyRegistrar
         IConfiguration configuration)
     {
         services.Configure<RabbitMqConfig>(configuration.GetSection(RabbitMqConfig.SectionName));
+        services.Configure<NotificationsRabbitMqConfig>(configuration.GetSection(NotificationsRabbitMqConfig.SectionName));
 
         services
             .AddRabbitMq()
@@ -57,6 +59,7 @@ public static class InfrastructureDependencyRegistrar
         
         services.AddSingleton<IRabbitMqConfigProvider, RabbitMqConfigProvider>();
         services.AddSingleton<IRabbitMqChannelProvider, RabbitMqChannelProvider>();
+        services.AddSingleton<ISensorNotificationService, RabbitMqNotificationPublisher>();
 
         return services;
     }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using DataProcessor.Infrastructure.RabbitMq;
+using Microsoft.Extensions.Options;
 
 namespace DataProcessor.Infrastructure.RabbitMq.Providers;
 
@@ -18,19 +19,23 @@ public class RabbitMqConfig
 public interface IRabbitMqConfigProvider
 {
     RabbitMqConfig GetRabbitMqConfig();
+    NotificationsRabbitMqConfig GetNotificationsConfig();
 }
 
 public class RabbitMqConfigProvider : IRabbitMqConfigProvider
 {
     private readonly RabbitMqConfig _config;
-    
-    public RabbitMqConfigProvider(IOptions<RabbitMqConfig> config)
+    private readonly NotificationsRabbitMqConfig _notificationsConfig;
+
+    public RabbitMqConfigProvider(
+        IOptions<RabbitMqConfig> config,
+        IOptions<NotificationsRabbitMqConfig> notificationsConfig)
     {
         _config = config.Value;
+        _notificationsConfig = notificationsConfig.Value;
     }
-    
-    public RabbitMqConfig GetRabbitMqConfig()
-    {
-        return _config;
-    }
+
+    public RabbitMqConfig GetRabbitMqConfig() => _config;
+
+    public NotificationsRabbitMqConfig GetNotificationsConfig() => _notificationsConfig;
 }

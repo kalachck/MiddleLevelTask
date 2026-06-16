@@ -1,9 +1,6 @@
 using DataProcessor.Application;
-using DataProcessor.Application.Interfaces.Services;
 using DataProcessor.Infrastructure;
 using DataProcessor.Presentation.Middlewares;
-using DataProcessor.Presentation.SignalR.Hubs;
-using DataProcessor.Presentation.SignalR.Services;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -20,20 +17,8 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
     .Enrich.FromLogContext());
 
 builder.Services.AddOpenApi();
-builder.Services.AddSignalR();
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("UiDev", policy =>
-        policy
-            .WithOrigins("http://localhost:5173", "http://127.0.0.1:5173")
-            .AllowAnyHeader()
-            .AllowAnyMethod());
-});
 
 builder.Services.AddTransient<GlobalExceptionHandlerMiddleware>();
-builder.Services.AddTransient<HubAuthMiddleware>();
-builder.Services.AddScoped<ISensorNotificationService, SignalRNotificationService>();
 
 builder.Services.AddApplicationDependencies();
 builder.Services.AddInfrastructureDependencies(builder.Configuration);
@@ -45,15 +30,9 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("docker"))
     app.MapOpenApi();
 }
 
-app.UseCors("UiDev");
-
 app.UseSerilogRequestLogging();
 
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
-
-app.UseMiddleware<HubAuthMiddleware>();
-
-app.MapHub<SensorsHub>("/hubs/sensors");
 
 app.Services.AddInfrastructureAppDependencies();
 

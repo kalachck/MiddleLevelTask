@@ -1,4 +1,4 @@
-﻿namespace DataProcessor.Presentation.Middlewares;
+namespace NotificationService.Presentation.Middlewares;
 
 public class HubAuthMiddleware : IMiddleware
 {
