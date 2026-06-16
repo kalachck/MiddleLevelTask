@@ -6,20 +6,6 @@ on:
       - 'api-gateway-tst-*'
       - 'api-gateway-ppd-*'
       - 'api-gateway-prd-*'
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: Target environment
-        required: true
-        type: choice
-        options:
-          - tst
-          - ppd
-          - prd
-      version:
-        description: Version label (e.g. v1.0.0)
-        required: true
-        default: manual
 
 env:
   SERVICE_NAME: api-gateway
