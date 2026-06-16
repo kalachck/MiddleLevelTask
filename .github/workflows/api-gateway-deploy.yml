@@ -10,8 +10,6 @@ on:
 env:
   SERVICE_NAME: api-gateway
   AZURE_RESOURCE_GROUP: rg-sensor-platform
-  ACR_NAME: acrsensorplatform
-  APP_NAME_PREFIX: app-sensor-api-gateway
 
 jobs:
   resolve-environment:
@@ -29,7 +27,7 @@ jobs:
       service_name: api-gateway
       image_tag: ${{ needs.resolve-environment.outputs.image_tag }}
       docker_context: ApiGateway
-      acr_name: ${{ env.ACR_NAME }}
+      acr_name: acrsensorplatform
 
   deploy:
     needs: [resolve-environment, build-image]
@@ -39,7 +37,7 @@ jobs:
       DEPLOY_ENV: ${{ needs.resolve-environment.outputs.environment }}
       DEPLOY_VERSION: ${{ needs.resolve-environment.outputs.version }}
       IMAGE: ${{ needs.build-image.outputs.image }}
-      AZURE_WEBAPP_NAME: ${{ env.APP_NAME_PREFIX }}-${{ needs.resolve-environment.outputs.environment }}
+      AZURE_WEBAPP_NAME: app-sensor-api-gateway-${{ needs.resolve-environment.outputs.environment }}
 
     steps:
       - name: Deploy to Azure Web App
