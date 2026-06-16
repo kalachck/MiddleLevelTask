@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR;
 
-namespace DataProcessor.Presentation.SignalR.Hubs;
+namespace NotificationService.Presentation.SignalR.Hubs;
 
 public class SensorsHub : Hub
 {

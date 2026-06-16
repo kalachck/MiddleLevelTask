@@ -1,42 +1,37 @@
 using AutoFixture;
-using DataProcessor.Application.Dtos;
-using DataProcessor.Presentation.SignalR.Hubs;
-using DataProcessor.Presentation.SignalR.Services;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using NotificationService.Application.Dtos;
+using NotificationService.Presentation.SignalR.Hubs;
+using NotificationService.Presentation.SignalR.Services;
 using NSubstitute;
 
-namespace DataProcessor.Tests.UnitTests;
+namespace NotificationService.Tests.UnitTests;
 
-public class SignalRNotificationServiceTests
+public class SignalRHubBroadcasterTests
 {
     private readonly IFixture _fixture = new Fixture();
     private readonly IHubContext<SensorsHub> _hubContext = Substitute.For<IHubContext<SensorsHub>>();
     private readonly IHubClients _hubClients = Substitute.For<IHubClients>();
     private readonly IClientProxy _allClientsProxy = Substitute.For<IClientProxy>();
-    private readonly ILogger<SignalRNotificationService> _logger = NullLogger<SignalRNotificationService>.Instance;
 
-    public SignalRNotificationServiceTests()
+    public SignalRHubBroadcasterTests()
     {
         _hubContext.Clients.Returns(_hubClients);
         _hubClients.All.Returns(_allClientsProxy);
     }
 
-    private SignalRNotificationService CreateSut() => new(_hubContext, _logger);
+    private SignalRHubBroadcaster CreateSut() => new(_hubContext, NullLogger<SignalRHubBroadcaster>.Instance);
 
     [Fact]
     public async Task NotifyEnergyProcessedAsync_WhenInvoked_ShouldBroadcastToAllClientsWithExpectedMethod()
     {
-        // Arrange
         var dto = _fixture.Create<EnergyReadingDto>();
         using var cts = new CancellationTokenSource();
         var sut = CreateSut();
 
-        // Act
         await sut.NotifyEnergyProcessedAsync(dto, cts.Token);
 
-        // Assert
         await _allClientsProxy.Received(1).SendCoreAsync(
             "NotifyEnergyProcessed",
             Arg.Any<object?[]>(),
@@ -46,7 +41,6 @@ public class SignalRNotificationServiceTests
     [Fact]
     public async Task NotifyEnergyProcessedAsync_WhenInvoked_ShouldSendNamePayloadAndTimestampAsPayload()
     {
-        // Arrange
         var dto = new EnergyReadingDto
         {
             Name = "Office",
@@ -55,10 +49,8 @@ public class SignalRNotificationServiceTests
         };
         var sut = CreateSut();
 
-        // Act
         await sut.NotifyEnergyProcessedAsync(dto, CancellationToken.None);
 
-        // Assert
         await _allClientsProxy.Received(1).SendCoreAsync(
             "NotifyEnergyProcessed",
             Arg.Is<object?[]>(args => args.Length == 1 && PayloadHasEnergyShape(args[0], dto)),
@@ -68,15 +60,12 @@ public class SignalRNotificationServiceTests
     [Fact]
     public async Task NotifyMotionProcessedAsync_WhenInvoked_ShouldBroadcastToAllClientsWithExpectedMethod()
     {
-        // Arrange
         var dto = _fixture.Create<MotionReadingDto>();
         using var cts = new CancellationTokenSource();
         var sut = CreateSut();
 
-        // Act
         await sut.NotifyMotionProcessedAsync(dto, cts.Token);
 
-        // Assert
         await _allClientsProxy.Received(1).SendCoreAsync(
             "NotifyMotionProcessed",
             Arg.Any<object?[]>(),
@@ -86,7 +75,6 @@ public class SignalRNotificationServiceTests
     [Fact]
     public async Task NotifyMotionProcessedAsync_WhenInvoked_ShouldSendNamePayloadAndTimestampAsPayload()
     {
-        // Arrange
         var dto = new MotionReadingDto
         {
             Name = "Hallway",
@@ -95,10 +83,8 @@ public class SignalRNotificationServiceTests
         };
         var sut = CreateSut();
 
-        // Act
         await sut.NotifyMotionProcessedAsync(dto, CancellationToken.None);
 
-        // Assert
         await _allClientsProxy.Received(1).SendCoreAsync(
             "NotifyMotionProcessed",
             Arg.Is<object?[]>(args => args.Length == 1 && PayloadHasMotionShape(args[0], dto)),
@@ -108,15 +94,12 @@ public class SignalRNotificationServiceTests
     [Fact]
     public async Task NotifyAirQualityProcessedAsync_WhenInvoked_ShouldBroadcastToAllClientsWithExpectedMethod()
     {
-        // Arrange
         var dto = _fixture.Create<AirQualityReadingDto>();
         using var cts = new CancellationTokenSource();
         var sut = CreateSut();
 
-        // Act
         await sut.NotifyAirQualityProcessedAsync(dto, cts.Token);
 
-        // Assert
         await _allClientsProxy.Received(1).SendCoreAsync(
             "NotifyAirQualityProcessed",
             Arg.Any<object?[]>(),
@@ -126,7 +109,6 @@ public class SignalRNotificationServiceTests
     [Fact]
     public async Task NotifyAirQualityProcessedAsync_WhenInvoked_ShouldSendFlattenedPayloadFields()
     {
-        // Arrange
         var dto = new AirQualityReadingDto
         {
             Name = "Lobby",
@@ -135,10 +117,8 @@ public class SignalRNotificationServiceTests
         };
         var sut = CreateSut();
 
-        // Act
         await sut.NotifyAirQualityProcessedAsync(dto, CancellationToken.None);
 
-        // Assert
         await _allClientsProxy.Received(1).SendCoreAsync(
             "NotifyAirQualityProcessed",
             Arg.Is<object?[]>(args => args.Length == 1 && PayloadHasAirQualityShape(args[0], dto)),
