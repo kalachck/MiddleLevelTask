@@ -3,18 +3,8 @@ name: Data Processor CI
 on:
   push:
     branches: [main]
-    paths:
-      - 'DataProcessor/**'
-      - '.github/workflows/data-processor-ci.yml'
-      - '.github/workflows/data-processor-deploy.yml'
-      - '.github/workflows/reusable-*.yml'
   pull_request:
     branches: [main]
-    paths:
-      - 'DataProcessor/**'
-      - '.github/workflows/data-processor-ci.yml'
-      - '.github/workflows/data-processor-deploy.yml'
-      - '.github/workflows/reusable-*.yml'
   workflow_dispatch:
 
 jobs:

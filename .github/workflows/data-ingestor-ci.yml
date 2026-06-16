@@ -3,18 +3,8 @@ name: Data Ingestor CI
 on:
   push:
     branches: [main]
-    paths:
-      - 'DataIngestor/**'
-      - '.github/workflows/data-ingestor-ci.yml'
-      - '.github/workflows/data-ingestor-deploy.yml'
-      - '.github/workflows/reusable-*.yml'
   pull_request:
     branches: [main]
-    paths:
-      - 'DataIngestor/**'
-      - '.github/workflows/data-ingestor-ci.yml'
-      - '.github/workflows/data-ingestor-deploy.yml'
-      - '.github/workflows/reusable-*.yml'
   workflow_dispatch:
 
 jobs:
