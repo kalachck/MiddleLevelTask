@@ -6,20 +6,6 @@ on:
       - 'data-processor-tst-*'
       - 'data-processor-ppd-*'
       - 'data-processor-prd-*'
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: Target environment
-        required: true
-        type: choice
-        options:
-          - tst
-          - ppd
-          - prd
-      version:
-        description: Version label (e.g. v1.0.0)
-        required: true
-        default: manual
 
 env:
   SERVICE_NAME: data-processor
