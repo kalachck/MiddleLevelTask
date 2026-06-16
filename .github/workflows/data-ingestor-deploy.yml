@@ -29,7 +29,7 @@ env:
 
 jobs:
   resolve-environment:
-    uses: ./.github/workflows/reusable/parse-deployment-target.yml
+    uses: ./.github/workflows/reusable-parse-deployment-target.yml
     with:
       service_name: data-ingestor
       tag_name: ${{ github.ref_name }}
@@ -38,7 +38,7 @@ jobs:
 
   build-image:
     needs: resolve-environment
-    uses: ./.github/workflows/reusable/azure-container-image.yml
+    uses: ./.github/workflows/reusable-azure-container-image.yml
     with:
       service_name: data-ingestor
       image_tag: ${{ needs.resolve-environment.outputs.image_tag }}

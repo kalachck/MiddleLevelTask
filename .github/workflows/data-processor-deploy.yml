@@ -1,11 +1,11 @@
-name: UI Deploy
+name: Data Processor Deploy
 
 on:
   push:
     tags:
-      - 'ui-tst-*'
-      - 'ui-ppd-*'
-      - 'ui-prd-*'
+      - 'data-processor-tst-*'
+      - 'data-processor-ppd-*'
+      - 'data-processor-prd-*'
   workflow_dispatch:
     inputs:
       environment:
@@ -22,45 +22,44 @@ on:
         default: manual
 
 env:
-  SERVICE_NAME: ui
+  SERVICE_NAME: data-processor
   AZURE_RESOURCE_GROUP: rg-sensor-platform
-  STATIC_WEB_APP_NAME_PREFIX: swa-sensor-ui
+  ACR_NAME: acrsensorplatform
+  CONTAINER_APP_NAME_PREFIX: ca-sensor-data-processor
 
 jobs:
   resolve-environment:
-    uses: ./.github/workflows/reusable/parse-deployment-target.yml
+    uses: ./.github/workflows/reusable-parse-deployment-target.yml
     with:
-      service_name: ui
+      service_name: data-processor
       tag_name: ${{ github.ref_name }}
       environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || '' }}
       version: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '' }}
 
-  azure-login:
+  build-image:
     needs: resolve-environment
-    uses: ./.github/workflows/reusable/azure-login.yml
+    uses: ./.github/workflows/reusable-azure-container-image.yml
+    with:
+      service_name: data-processor
+      image_tag: ${{ needs.resolve-environment.outputs.image_tag }}
+      docker_context: DataProcessor
+      acr_name: ${{ env.ACR_NAME }}
 
   deploy:
-    needs: [resolve-environment, azure-login]
+    needs: [resolve-environment, build-image]
     runs-on: ubuntu-latest
     environment: ${{ needs.resolve-environment.outputs.environment }}
     env:
       DEPLOY_ENV: ${{ needs.resolve-environment.outputs.environment }}
       DEPLOY_VERSION: ${{ needs.resolve-environment.outputs.version }}
-      AZURE_STATIC_WEB_APP: ${{ env.STATIC_WEB_APP_NAME_PREFIX }}-${{ needs.resolve-environment.outputs.environment }}
+      IMAGE: ${{ needs.build-image.outputs.image }}
+      AZURE_CONTAINER_APP: ${{ env.CONTAINER_APP_NAME_PREFIX }}-${{ needs.resolve-environment.outputs.environment }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Build static assets
+      - name: Deploy to Azure Container Apps
         run: |
-          echo "Simulating: npm ci && npm run build"
-          echo "Static assets built for $DEPLOY_ENV"
-
-      - name: Deploy to Azure Static Web Apps
-        run: |
-          echo "Simulating: az staticwebapp deploy \\"
-          echo "  --name $AZURE_STATIC_WEB_APP \\"
+          echo "Simulating: az containerapp update \\"
+          echo "  --name $AZURE_CONTAINER_APP \\"
           echo "  --resource-group $AZURE_RESOURCE_GROUP \\"
-          echo "  --source UI/dist"
+          echo "  --image $IMAGE"
           echo "Deployed $SERVICE_NAME $DEPLOY_VERSION to $DEPLOY_ENV"

@@ -1,11 +1,11 @@
-name: Api Gateway Deploy
+name: UI Deploy
 
 on:
   push:
     tags:
-      - 'api-gateway-tst-*'
-      - 'api-gateway-ppd-*'
-      - 'api-gateway-prd-*'
+      - 'ui-tst-*'
+      - 'ui-ppd-*'
+      - 'ui-prd-*'
   workflow_dispatch:
     inputs:
       environment:
@@ -22,45 +22,45 @@ on:
         default: manual
 
 env:
-  SERVICE_NAME: api-gateway
+  SERVICE_NAME: ui
   AZURE_RESOURCE_GROUP: rg-sensor-platform
-  ACR_NAME: acrsensorplatform
-  APP_NAME_PREFIX: app-sensor-api-gateway
+  STATIC_WEB_APP_NAME_PREFIX: swa-sensor-ui
 
 jobs:
   resolve-environment:
-    uses: ./.github/workflows/reusable/parse-deployment-target.yml
+    uses: ./.github/workflows/reusable-parse-deployment-target.yml
     with:
-      service_name: api-gateway
+      service_name: ui
       tag_name: ${{ github.ref_name }}
       environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || '' }}
       version: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '' }}
 
-  build-image:
+  azure-login:
     needs: resolve-environment
-    uses: ./.github/workflows/reusable/azure-container-image.yml
-    with:
-      service_name: api-gateway
-      image_tag: ${{ needs.resolve-environment.outputs.image_tag }}
-      docker_context: ApiGateway
-      acr_name: ${{ env.ACR_NAME }}
+    uses: ./.github/workflows/reusable-azure-login.yml
 
   deploy:
-    needs: [resolve-environment, build-image]
+    needs: [resolve-environment, azure-login]
     runs-on: ubuntu-latest
     environment: ${{ needs.resolve-environment.outputs.environment }}
     env:
       DEPLOY_ENV: ${{ needs.resolve-environment.outputs.environment }}
       DEPLOY_VERSION: ${{ needs.resolve-environment.outputs.version }}
-      IMAGE: ${{ needs.build-image.outputs.image }}
-      AZURE_WEBAPP_NAME: ${{ env.APP_NAME_PREFIX }}-${{ needs.resolve-environment.outputs.environment }}
+      AZURE_STATIC_WEB_APP: ${{ env.STATIC_WEB_APP_NAME_PREFIX }}-${{ needs.resolve-environment.outputs.environment }}
 
     steps:
-      - name: Deploy to Azure Web App
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build static assets
         run: |
-          echo "Simulating: az webapp config container set \\"
-          echo "  --name $AZURE_WEBAPP_NAME \\"
+          echo "Simulating: npm ci && npm run build"
+          echo "Static assets built for $DEPLOY_ENV"
+
+      - name: Deploy to Azure Static Web Apps
+        run: |
+          echo "Simulating: az staticwebapp deploy \\"
+          echo "  --name $AZURE_STATIC_WEB_APP \\"
           echo "  --resource-group $AZURE_RESOURCE_GROUP \\"
-          echo "  --docker-custom-image-name $IMAGE"
-          echo "Simulating: az webapp restart --name $AZURE_WEBAPP_NAME --resource-group $AZURE_RESOURCE_GROUP"
+          echo "  --source UI/dist"
           echo "Deployed $SERVICE_NAME $DEPLOY_VERSION to $DEPLOY_ENV"

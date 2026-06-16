@@ -1,16 +1,20 @@
-name: UI CI
+name: Api Gateway CI
 
 on:
   push:
     branches: [main]
     paths:
-      - 'UI/**'
-      - '.github/workflows/ui/**'
+      - 'ApiGateway/**'
+      - '.github/workflows/api-gateway-ci.yml'
+      - '.github/workflows/api-gateway-deploy.yml'
+      - '.github/workflows/reusable-*.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'UI/**'
-      - '.github/workflows/ui/**'
+      - 'ApiGateway/**'
+      - '.github/workflows/api-gateway-ci.yml'
+      - '.github/workflows/api-gateway-deploy.yml'
+      - '.github/workflows/reusable-*.yml'
   workflow_dispatch:
 
 jobs:
@@ -18,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: UI
+        working-directory: ApiGateway
 
     steps:
       - name: Checkout repository
@@ -29,13 +33,10 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: UI/package-lock.json
+          cache-dependency-path: ApiGateway/package-lock.json
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Lint
-        run: npm run lint
 
       - name: Build application
         run: npm run build
