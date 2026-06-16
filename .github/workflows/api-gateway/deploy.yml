@@ -1,0 +1,66 @@
+name: Api Gateway Deploy
+
+on:
+  push:
+    tags:
+      - 'api-gateway-tst-*'
+      - 'api-gateway-ppd-*'
+      - 'api-gateway-prd-*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        type: choice
+        options:
+          - tst
+          - ppd
+          - prd
+      version:
+        description: Version label (e.g. v1.0.0)
+        required: true
+        default: manual
+
+env:
+  SERVICE_NAME: api-gateway
+  AZURE_RESOURCE_GROUP: rg-sensor-platform
+  ACR_NAME: acrsensorplatform
+  APP_NAME_PREFIX: app-sensor-api-gateway
+
+jobs:
+  resolve-environment:
+    uses: ./.github/workflows/reusable/parse-deployment-target.yml
+    with:
+      service_name: api-gateway
+      tag_name: ${{ github.ref_name }}
+      environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || '' }}
+      version: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '' }}
+
+  build-image:
+    needs: resolve-environment
+    uses: ./.github/workflows/reusable/azure-container-image.yml
+    with:
+      service_name: api-gateway
+      image_tag: ${{ needs.resolve-environment.outputs.image_tag }}
+      docker_context: ApiGateway
+      acr_name: ${{ env.ACR_NAME }}
+
+  deploy:
+    needs: [resolve-environment, build-image]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.resolve-environment.outputs.environment }}
+    env:
+      DEPLOY_ENV: ${{ needs.resolve-environment.outputs.environment }}
+      DEPLOY_VERSION: ${{ needs.resolve-environment.outputs.version }}
+      IMAGE: ${{ needs.build-image.outputs.image }}
+      AZURE_WEBAPP_NAME: ${{ env.APP_NAME_PREFIX }}-${{ needs.resolve-environment.outputs.environment }}
+
+    steps:
+      - name: Deploy to Azure Web App
+        run: |
+          echo "Simulating: az webapp config container set \\"
+          echo "  --name $AZURE_WEBAPP_NAME \\"
+          echo "  --resource-group $AZURE_RESOURCE_GROUP \\"
+          echo "  --docker-custom-image-name $IMAGE"
+          echo "Simulating: az webapp restart --name $AZURE_WEBAPP_NAME --resource-group $AZURE_RESOURCE_GROUP"
+          echo "Deployed $SERVICE_NAME $DEPLOY_VERSION to $DEPLOY_ENV"

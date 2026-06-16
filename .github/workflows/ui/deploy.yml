@@ -1,0 +1,66 @@
+name: UI Deploy
+
+on:
+  push:
+    tags:
+      - 'ui-tst-*'
+      - 'ui-ppd-*'
+      - 'ui-prd-*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        type: choice
+        options:
+          - tst
+          - ppd
+          - prd
+      version:
+        description: Version label (e.g. v1.0.0)
+        required: true
+        default: manual
+
+env:
+  SERVICE_NAME: ui
+  AZURE_RESOURCE_GROUP: rg-sensor-platform
+  STATIC_WEB_APP_NAME_PREFIX: swa-sensor-ui
+
+jobs:
+  resolve-environment:
+    uses: ./.github/workflows/reusable/parse-deployment-target.yml
+    with:
+      service_name: ui
+      tag_name: ${{ github.ref_name }}
+      environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || '' }}
+      version: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '' }}
+
+  azure-login:
+    needs: resolve-environment
+    uses: ./.github/workflows/reusable/azure-login.yml
+
+  deploy:
+    needs: [resolve-environment, azure-login]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.resolve-environment.outputs.environment }}
+    env:
+      DEPLOY_ENV: ${{ needs.resolve-environment.outputs.environment }}
+      DEPLOY_VERSION: ${{ needs.resolve-environment.outputs.version }}
+      AZURE_STATIC_WEB_APP: ${{ env.STATIC_WEB_APP_NAME_PREFIX }}-${{ needs.resolve-environment.outputs.environment }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build static assets
+        run: |
+          echo "Simulating: npm ci && npm run build"
+          echo "Static assets built for $DEPLOY_ENV"
+
+      - name: Deploy to Azure Static Web Apps
+        run: |
+          echo "Simulating: az staticwebapp deploy \\"
+          echo "  --name $AZURE_STATIC_WEB_APP \\"
+          echo "  --resource-group $AZURE_RESOURCE_GROUP \\"
+          echo "  --source UI/dist"
+          echo "Deployed $SERVICE_NAME $DEPLOY_VERSION to $DEPLOY_ENV"

@@ -1,0 +1,65 @@
+name: Data Ingestor Deploy
+
+on:
+  push:
+    tags:
+      - 'data-ingestor-tst-*'
+      - 'data-ingestor-ppd-*'
+      - 'data-ingestor-prd-*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        type: choice
+        options:
+          - tst
+          - ppd
+          - prd
+      version:
+        description: Version label (e.g. v1.0.0)
+        required: true
+        default: manual
+
+env:
+  SERVICE_NAME: data-ingestor
+  AZURE_RESOURCE_GROUP: rg-sensor-platform
+  ACR_NAME: acrsensorplatform
+  CONTAINER_APP_NAME_PREFIX: ca-sensor-data-ingestor
+
+jobs:
+  resolve-environment:
+    uses: ./.github/workflows/reusable/parse-deployment-target.yml
+    with:
+      service_name: data-ingestor
+      tag_name: ${{ github.ref_name }}
+      environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || '' }}
+      version: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '' }}
+
+  build-image:
+    needs: resolve-environment
+    uses: ./.github/workflows/reusable/azure-container-image.yml
+    with:
+      service_name: data-ingestor
+      image_tag: ${{ needs.resolve-environment.outputs.image_tag }}
+      docker_context: DataIngestor
+      acr_name: ${{ env.ACR_NAME }}
+
+  deploy:
+    needs: [resolve-environment, build-image]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.resolve-environment.outputs.environment }}
+    env:
+      DEPLOY_ENV: ${{ needs.resolve-environment.outputs.environment }}
+      DEPLOY_VERSION: ${{ needs.resolve-environment.outputs.version }}
+      IMAGE: ${{ needs.build-image.outputs.image }}
+      AZURE_CONTAINER_APP: ${{ env.CONTAINER_APP_NAME_PREFIX }}-${{ needs.resolve-environment.outputs.environment }}
+
+    steps:
+      - name: Deploy to Azure Container Apps
+        run: |
+          echo "Simulating: az containerapp update \\"
+          echo "  --name $AZURE_CONTAINER_APP \\"
+          echo "  --resource-group $AZURE_RESOURCE_GROUP \\"
+          echo "  --image $IMAGE"
+          echo "Deployed $SERVICE_NAME $DEPLOY_VERSION to $DEPLOY_ENV"

@@ -1,0 +1,58 @@
+name: Azure Container Image
+
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        description: Container image repository name
+        required: true
+        type: string
+      image_tag:
+        description: Image tag to build and push
+        required: true
+        type: string
+      docker_context:
+        description: Docker build context directory
+        required: true
+        type: string
+      acr_name:
+        description: Azure Container Registry name
+        required: true
+        type: string
+    outputs:
+      image:
+        description: Full container image reference
+        value: ${{ jobs.build.outputs.image }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.build.outputs.image }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        run: |
+          echo "Simulating: az login --service-principal ..."
+          echo "Logged in to subscription"
+
+      - name: Log in to Azure Container Registry
+        run: |
+          echo "Simulating: az acr login --name ${{ inputs.acr_name }}"
+          echo "Authenticated with ${{ inputs.acr_name }}.azurecr.io"
+
+      - name: Build and push container image
+        id: build
+        env:
+          SERVICE_NAME: ${{ inputs.service_name }}
+          IMAGE_TAG: ${{ inputs.image_tag }}
+          ACR_NAME: ${{ inputs.acr_name }}
+          DOCKER_CONTEXT: ${{ inputs.docker_context }}
+        run: |
+          IMAGE="$ACR_NAME.azurecr.io/$SERVICE_NAME:$IMAGE_TAG"
+          echo "Simulating: docker build -t $IMAGE $DOCKER_CONTEXT"
+          echo "Simulating: docker push $IMAGE"
+          echo "Image published: $IMAGE"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
