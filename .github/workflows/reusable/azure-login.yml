@@ -1,0 +1,13 @@
+name: Azure Login
+
+on:
+  workflow_call:
+
+jobs:
+  login:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log in to Azure
+        run: |
+          echo "Simulating: az login --service-principal ..."
+          echo "Logged in to subscription"

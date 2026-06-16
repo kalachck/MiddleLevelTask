@@ -1,16 +1,16 @@
-name: Data Ingestor CI
+name: Data Processor CI
 
 on:
   push:
     branches: [main]
     paths:
-      - 'DataIngestor/**'
-      - '.github/workflows/data-ingestor-ci.yml'
+      - 'DataProcessor/**'
+      - '.github/workflows/data-processor/**'
   pull_request:
     branches: [main]
     paths:
-      - 'DataIngestor/**'
-      - '.github/workflows/data-ingestor-ci.yml'
+      - 'DataProcessor/**'
+      - '.github/workflows/data-processor/**'
   workflow_dispatch:
 
 jobs:
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: DataIngestor
+        working-directory: DataProcessor
 
     steps:
       - name: Checkout code
@@ -31,9 +31,9 @@ jobs:
 
       - name: Restore dependencies
         run: dotnet restore
-      
+
       - name: Build
         run: dotnet build --no-restore
-      
+
       - name: Test
         run: dotnet test --no-build --verbosity normal

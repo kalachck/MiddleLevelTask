@@ -1,0 +1,65 @@
+name: Parse Deployment Target
+
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        description: Service prefix used in deployment tags
+        required: true
+        type: string
+      tag_name:
+        description: Git tag name (used when deploying from a tag push)
+        required: true
+        type: string
+      environment:
+        description: Target environment for manual deployments
+        required: false
+        type: string
+      version:
+        description: Version label for manual deployments
+        required: false
+        type: string
+    outputs:
+      environment:
+        description: Resolved deployment environment (tst, ppd, prd)
+        value: ${{ jobs.resolve.outputs.environment }}
+      version:
+        description: Resolved deployment version
+        value: ${{ jobs.resolve.outputs.version }}
+      image_tag:
+        description: Docker image tag derived from environment and version
+        value: ${{ jobs.resolve.outputs.image_tag }}
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.parse.outputs.environment }}
+      version: ${{ steps.parse.outputs.version }}
+      image_tag: ${{ steps.parse.outputs.image_tag }}
+    steps:
+      - name: Parse deployment target
+        id: parse
+        env:
+          SERVICE_NAME: ${{ inputs.service_name }}
+          TAG_NAME: ${{ inputs.tag_name }}
+          ENVIRONMENT_INPUT: ${{ inputs.environment }}
+          VERSION_INPUT: ${{ inputs.version }}
+        run: |
+          if [ -n "$ENVIRONMENT_INPUT" ] && [ -n "$VERSION_INPUT" ]; then
+            ENV="$ENVIRONMENT_INPUT"
+            VERSION="$VERSION_INPUT"
+          else
+            TAG="$TAG_NAME"
+            PATTERN="^${SERVICE_NAME}-(tst|ppd|prd)-(.+)$"
+            if [[ ! "$TAG" =~ $PATTERN ]]; then
+              echo "Invalid tag format: $TAG (expected ${SERVICE_NAME}-{tst|ppd|prd}-<version>)" >&2
+              exit 1
+            fi
+            ENV="${BASH_REMATCH[1]}"
+            VERSION="${BASH_REMATCH[2]}"
+          fi
+
+          echo "environment=$ENV" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "image_tag=$ENV-$VERSION" >> "$GITHUB_OUTPUT"
