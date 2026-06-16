@@ -10,7 +10,6 @@ on:
 env:
   SERVICE_NAME: ui
   AZURE_RESOURCE_GROUP: rg-sensor-platform
-  STATIC_WEB_APP_NAME_PREFIX: swa-sensor-ui
 
 jobs:
   resolve-environment:
@@ -32,7 +31,7 @@ jobs:
     env:
       DEPLOY_ENV: ${{ needs.resolve-environment.outputs.environment }}
       DEPLOY_VERSION: ${{ needs.resolve-environment.outputs.version }}
-      AZURE_STATIC_WEB_APP: ${{ env.STATIC_WEB_APP_NAME_PREFIX }}-${{ needs.resolve-environment.outputs.environment }}
+      AZURE_STATIC_WEB_APP: swa-sensor-ui-${{ needs.resolve-environment.outputs.environment }}
 
     steps:
       - name: Checkout repository

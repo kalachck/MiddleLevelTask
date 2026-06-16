@@ -10,8 +10,6 @@ on:
 env:
   SERVICE_NAME: data-ingestor
   AZURE_RESOURCE_GROUP: rg-sensor-platform
-  ACR_NAME: acrsensorplatform
-  CONTAINER_APP_NAME_PREFIX: ca-sensor-data-ingestor
 
 jobs:
   resolve-environment:
@@ -29,7 +27,7 @@ jobs:
       service_name: data-ingestor
       image_tag: ${{ needs.resolve-environment.outputs.image_tag }}
       docker_context: DataIngestor
-      acr_name: ${{ env.ACR_NAME }}
+      acr_name: acrsensorplatform
 
   deploy:
     needs: [resolve-environment, build-image]
@@ -39,7 +37,7 @@ jobs:
       DEPLOY_ENV: ${{ needs.resolve-environment.outputs.environment }}
       DEPLOY_VERSION: ${{ needs.resolve-environment.outputs.version }}
       IMAGE: ${{ needs.build-image.outputs.image }}
-      AZURE_CONTAINER_APP: ${{ env.CONTAINER_APP_NAME_PREFIX }}-${{ needs.resolve-environment.outputs.environment }}
+      AZURE_CONTAINER_APP: ca-sensor-data-ingestor-${{ needs.resolve-environment.outputs.environment }}
 
     steps:
       - name: Deploy to Azure Container Apps
