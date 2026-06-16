@@ -1,16 +1,20 @@
-name: Data Processor CI
+name: Data Ingestor CI
 
 on:
   push:
     branches: [main]
     paths:
-      - 'DataProcessor/**'
-      - '.github/workflows/data-processor/**'
+      - 'DataIngestor/**'
+      - '.github/workflows/data-ingestor-ci.yml'
+      - '.github/workflows/data-ingestor-deploy.yml'
+      - '.github/workflows/reusable-*.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'DataProcessor/**'
-      - '.github/workflows/data-processor/**'
+      - 'DataIngestor/**'
+      - '.github/workflows/data-ingestor-ci.yml'
+      - '.github/workflows/data-ingestor-deploy.yml'
+      - '.github/workflows/reusable-*.yml'
   workflow_dispatch:
 
 jobs:
@@ -18,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: DataProcessor
+        working-directory: DataIngestor
 
     steps:
       - name: Checkout code
