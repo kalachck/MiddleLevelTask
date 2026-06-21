@@ -1,0 +1,32 @@
+using NotificationService.Application.Metrics;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+
+namespace NotificationService.Presentation.Observability;
+
+public static class OpenTelemetryExtensions
+{
+    public static IServiceCollection AddObservability(this IServiceCollection services, string serviceName)
+    {
+        services.AddOpenTelemetry()
+            .ConfigureResource(resource => resource.AddService(serviceName))
+            .WithMetrics(metrics => metrics
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddRuntimeInstrumentation()
+                .AddProcessInstrumentation()
+                .AddMeter(NotificationMetrics.MeterName)
+                .AddPrometheusExporter());
+
+        services.AddHealthChecks();
+
+        return services;
+    }
+
+    public static WebApplication UseObservability(this WebApplication app)
+    {
+        app.MapPrometheusScrapingEndpoint();
+        app.MapHealthChecks("/health");
+        return app;
+    }
+}

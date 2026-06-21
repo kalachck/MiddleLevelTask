@@ -1,3 +1,4 @@
+import './instrumentation.js';
 import './loadEnv.js';
 
 import Fastify from 'fastify';
@@ -5,6 +6,7 @@ import mercurius from 'mercurius';
 import cors from '@fastify/cors';
 import { typeDefs } from './schema.js';
 import { resolvers } from './resolvers.js';
+import { prometheusExporter } from './instrumentation.js';
 
 const app = Fastify({
   logger: {
@@ -33,6 +35,11 @@ const start = async () => {
       status: 'ok',
       timestamp: new Date().toISOString(),
     }));
+
+    app.get('/metrics', (request, reply) => {
+      reply.hijack();
+      prometheusExporter.getMetricsRequestHandler(request.raw, reply.raw);
+    });
 
     const port = Number(process.env.PORT) || 8080;
     const host = process.env.HOST || '0.0.0.0';
