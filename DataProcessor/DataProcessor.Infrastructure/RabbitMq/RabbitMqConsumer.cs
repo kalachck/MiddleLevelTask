@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using DataProcessor.Application.Interfaces.Services;
+using DataProcessor.Application.Metrics;
 using DataProcessor.Infrastructure.RabbitMq.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -17,15 +18,19 @@ public class RabbitMqConsumer<TService> : BackgroundService
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<RabbitMqConsumer<TService>> _logger;
 
+    private readonly DataProcessorMetrics _metrics;
+
     public RabbitMqConsumer(
         string queueName,
         IRabbitMqChannelProvider channelProvider,
         IServiceProvider serviceProvider,
+        DataProcessorMetrics metrics,
         ILogger<RabbitMqConsumer<TService>> logger)
     {
         _queueName = queueName;
         _channelProvider = channelProvider;
         _serviceProvider = serviceProvider;
+        _metrics = metrics;
         _logger = logger;
     }
 
@@ -37,6 +42,8 @@ public class RabbitMqConsumer<TService> : BackgroundService
 
         consumer.ReceivedAsync += async (_, ea) =>
         {
+            using var duration = _metrics.TrackProcessingDuration(_queueName);
+
             try
             {
                 var body = ea.Body.ToArray();
@@ -55,6 +62,7 @@ public class RabbitMqConsumer<TService> : BackgroundService
                 await processingService.ProcessReading(message, ct);
 
                 await channel.BasicAckAsync(ea.DeliveryTag, false, ct);
+                _metrics.RecordProcessed(_queueName);
 
                 _logger.LogDebug(
                     "Acknowledged message {DeliveryTag} on queue {QueueName}",
@@ -63,6 +71,8 @@ public class RabbitMqConsumer<TService> : BackgroundService
             }
             catch (Exception ex)
             {
+                _metrics.RecordFailed(_queueName);
+
                 _logger.LogError(
                     ex,
                     "Failed to process message on queue {QueueName} (delivery tag {DeliveryTag}); message will be requeued",

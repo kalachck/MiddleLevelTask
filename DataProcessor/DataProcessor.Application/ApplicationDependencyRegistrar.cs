@@ -2,6 +2,7 @@
 using DataProcessor.Application.Interfaces.Mappers;
 using DataProcessor.Application.Interfaces.Services;
 using DataProcessor.Application.Mappers;
+using DataProcessor.Application.Metrics;
 using DataProcessor.Application.Services;
 using DataProcessor.Domain.Entities;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +13,8 @@ public static class ApplicationDependencyRegistrar
 {
     public static void AddApplicationDependencies(this IServiceCollection services)
     {
+        services.AddSingleton<DataProcessorMetrics>();
+
         services.AddKeyedScoped<IReadingProcessingService, AirQualityProcessingService>(nameof(AirQualityProcessingService));
         services.AddKeyedScoped<IReadingProcessingService, MotionProcessingService>(nameof(MotionProcessingService));
         services.AddKeyedScoped<IReadingProcessingService, EnergyProcessingService>(nameof(EnergyProcessingService));

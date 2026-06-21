@@ -1,5 +1,6 @@
 ﻿using DataProcessor.Application.Interfaces.Repositories;
 using DataProcessor.Application.Interfaces.Services;
+using DataProcessor.Application.Metrics;
 using DataProcessor.Application.Services;
 using DataProcessor.Infrastructure.ClickHouse;
 using DataProcessor.Infrastructure.RabbitMq;
@@ -20,9 +21,8 @@ public static class InfrastructureDependencyRegistrar
         services.Configure<RabbitMqConfig>(configuration.GetSection(RabbitMqConfig.SectionName));
         services.Configure<NotificationsRabbitMqConfig>(configuration.GetSection(NotificationsRabbitMqConfig.SectionName));
 
-        services
-            .AddRabbitMq()
-            .AddDatabaseDependencies();
+        services.AddRabbitMq();
+        services.AddDatabaseDependencies();
     }
 
     public static void AddInfrastructureAppDependencies(this IServiceProvider serviceProvider)
@@ -37,34 +37,35 @@ public static class InfrastructureDependencyRegistrar
         logger.LogInformation("ClickHouse schema initialization completed");
     }
 
-    private static IServiceCollection AddRabbitMq(this IServiceCollection services)
+    private static void AddRabbitMq(this IServiceCollection services)
     {
         services.AddHostedService(sp => new RabbitMqConsumer<MotionProcessingService>(
             queueName: "sensors_queue.motion",
             channelProvider: sp.GetRequiredService<IRabbitMqChannelProvider>(),
             sp,
+            sp.GetRequiredService<DataProcessorMetrics>(),
             sp.GetRequiredService<ILogger<RabbitMqConsumer<MotionProcessingService>>>()));
 
         services.AddHostedService(sp => new RabbitMqConsumer<EnergyProcessingService>(
             queueName: "sensors_queue.energy",
             channelProvider: sp.GetRequiredService<IRabbitMqChannelProvider>(),
             sp,
+            sp.GetRequiredService<DataProcessorMetrics>(),
             sp.GetRequiredService<ILogger<RabbitMqConsumer<EnergyProcessingService>>>()));
 
         services.AddHostedService(sp => new RabbitMqConsumer<AirQualityProcessingService>(
             queueName: "sensors_queue.air_quality",
             channelProvider: sp.GetRequiredService<IRabbitMqChannelProvider>(),
             sp,
+            sp.GetRequiredService<DataProcessorMetrics>(),
             sp.GetRequiredService<ILogger<RabbitMqConsumer<AirQualityProcessingService>>>()));
         
         services.AddSingleton<IRabbitMqConfigProvider, RabbitMqConfigProvider>();
         services.AddSingleton<IRabbitMqChannelProvider, RabbitMqChannelProvider>();
         services.AddSingleton<ISensorNotificationService, RabbitMqNotificationPublisher>();
-
-        return services;
     }
 
-    private static IServiceCollection AddDatabaseDependencies(this IServiceCollection services)
+    private static void AddDatabaseDependencies(this IServiceCollection services)
     {
         services.AddSingleton<IClickHouseConfigProvider, ClickHouseConfigProvider>();
         services.AddScoped<IClickHouseConnectionFactory, ClickHouseConnectionFactory>();
@@ -73,7 +74,5 @@ public static class InfrastructureDependencyRegistrar
         services.AddScoped<IAirQualityRepository, AirQualityRepository>();
         services.AddScoped<IMotionRepository, MotionRepository>();
         services.AddScoped<IEnergyRepository, EnergyRepository>();
-        
-        return services;
     }
 }

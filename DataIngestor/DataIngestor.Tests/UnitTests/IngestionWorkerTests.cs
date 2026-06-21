@@ -1,6 +1,7 @@
 using AutoFixture;
 using DataIngestor.Application;
 using DataIngestor.Application.Configurations.Models;
+using DataIngestor.Application.Metrics;
 using DataIngestor.Domain.Abstractions;
 using DataIngestor.Domain.Models;
 using Microsoft.Extensions.DependencyInjection;
@@ -238,6 +239,8 @@ public class IngestionWorkerTests
             .PublishAsync(Arg.Any<SensorReading>(), Arg.Any<CancellationToken>());
     }
 
+    private readonly IngestionMetrics _metrics = new();
+
     private TestableIngestionWorker CreateSut(TimeSpan interval)
     {
         var services = new ServiceCollection();
@@ -246,7 +249,7 @@ public class IngestionWorkerTests
         var serviceProvider = services.BuildServiceProvider();
 
         var options = Options.Create(new IngestionOptions { Interval = interval });
-        return new TestableIngestionWorker(serviceProvider, _logger, options);
+        return new TestableIngestionWorker(serviceProvider, _logger, _metrics, options);
     }
 
     private static async Task SafeAwait(Task task)
@@ -266,8 +269,9 @@ public class IngestionWorkerTests
         public TestableIngestionWorker(
             IServiceProvider serviceProvider,
             ILogger<IngestionWorker> logger,
+            IngestionMetrics metrics,
             IOptions<IngestionOptions> options)
-            : base(serviceProvider, logger, options)
+            : base(serviceProvider, logger, metrics, options)
         {
         }
 

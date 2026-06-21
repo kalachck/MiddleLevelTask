@@ -1,3 +1,4 @@
+using NotificationService.Application.Metrics;
 using Microsoft.AspNetCore.SignalR;
 
 namespace NotificationService.Presentation.SignalR.Hubs;
@@ -5,14 +6,17 @@ namespace NotificationService.Presentation.SignalR.Hubs;
 public class SensorsHub : Hub
 {
     private readonly ILogger<SensorsHub> _logger;
+    private readonly NotificationMetrics _metrics;
 
-    public SensorsHub(ILogger<SensorsHub> logger)
+    public SensorsHub(ILogger<SensorsHub> logger, NotificationMetrics metrics)
     {
         _logger = logger;
+        _metrics = metrics;
     }
 
     public override Task OnConnectedAsync()
     {
+        _metrics.RecordConnection("connected");
         _logger.LogInformation(
             "SignalR client connected: {ConnectionId}",
             Context.ConnectionId);
@@ -21,6 +25,8 @@ public class SensorsHub : Hub
 
     public override Task OnDisconnectedAsync(Exception? exception)
     {
+        _metrics.RecordConnection("disconnected");
+
         if (exception is not null)
         {
             _logger.LogWarning(

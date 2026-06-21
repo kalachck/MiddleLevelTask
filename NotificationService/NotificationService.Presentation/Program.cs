@@ -1,6 +1,7 @@
 using NotificationService.Application.Interfaces;
 using NotificationService.Infrastructure;
 using NotificationService.Presentation.Middlewares;
+using NotificationService.Presentation.Observability;
 using NotificationService.Presentation.SignalR.Hubs;
 using NotificationService.Presentation.SignalR.Services;
 using Serilog;
@@ -19,6 +20,7 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
     .Enrich.FromLogContext());
 
 builder.Services.AddOpenApi();
+builder.Services.AddObservability("notification-service");
 builder.Services.AddSignalR();
 
 builder.Services.AddCors(options =>
@@ -48,6 +50,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("docker"))
 
 app.UseCors("Ui");
 app.UseSerilogRequestLogging();
+app.UseObservability();
 app.UseMiddleware<HubAuthMiddleware>();
 app.MapHub<SensorsHub>("/hubs/sensors");
 

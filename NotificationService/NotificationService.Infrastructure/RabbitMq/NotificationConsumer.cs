@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using NotificationService.Application.Dtos;
 using NotificationService.Application.Interfaces;
+using NotificationService.Application.Metrics;
 using NotificationService.Infrastructure.RabbitMq.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -18,6 +19,7 @@ public class NotificationConsumer<TDto> : BackgroundService
     private readonly IRabbitMqChannelProvider _channelProvider;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<NotificationConsumer<TDto>> _logger;
+    private readonly NotificationMetrics _metrics;
     private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
     public NotificationConsumer(
@@ -25,12 +27,14 @@ public class NotificationConsumer<TDto> : BackgroundService
         string notificationType,
         IRabbitMqChannelProvider channelProvider,
         IServiceProvider serviceProvider,
+        NotificationMetrics metrics,
         ILogger<NotificationConsumer<TDto>> logger)
     {
         _queueName = queueName;
         _notificationType = notificationType;
         _channelProvider = channelProvider;
         _serviceProvider = serviceProvider;
+        _metrics = metrics;
         _logger = logger;
     }
 
@@ -58,9 +62,12 @@ public class NotificationConsumer<TDto> : BackgroundService
                 await DispatchAsync(broadcaster, message, ct);
 
                 await channel.BasicAckAsync(ea.DeliveryTag, false, ct);
+                _metrics.RecordDispatched(_notificationType);
             }
             catch (Exception ex)
             {
+                _metrics.RecordFailed(_notificationType);
+
                 _logger.LogError(
                     ex,
                     "Failed to process {NotificationType} notification on queue {QueueName}; message will be requeued",

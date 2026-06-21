@@ -1,6 +1,7 @@
 using DataProcessor.Application;
 using DataProcessor.Infrastructure;
 using DataProcessor.Presentation.Middlewares;
+using DataProcessor.Presentation.Observability;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -17,6 +18,7 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
     .Enrich.FromLogContext());
 
 builder.Services.AddOpenApi();
+builder.Services.AddObservability("data-processor");
 
 builder.Services.AddTransient<GlobalExceptionHandlerMiddleware>();
 
@@ -32,6 +34,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("docker"))
 
 app.UseSerilogRequestLogging();
 
+app.UseObservability();
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 app.Services.AddInfrastructureAppDependencies();
