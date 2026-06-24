@@ -15,7 +15,7 @@ public class ClickHouseConfigProvider : IClickHouseConfigProvider
     {
         _connectionString = configuration.GetConnectionString("ClickHouseConnection") ?? throw new ArgumentException("ClickHouse connection string is required!");
     }
-    
-    public string GetConnectionString() 
+
+    public string GetConnectionString()
         => _connectionString;
 }

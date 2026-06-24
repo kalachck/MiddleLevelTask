@@ -18,7 +18,7 @@ public static class ApplicationDependencyRegistrar
         services.AddKeyedScoped<IReadingProcessingService, AirQualityProcessingService>(nameof(AirQualityProcessingService));
         services.AddKeyedScoped<IReadingProcessingService, MotionProcessingService>(nameof(MotionProcessingService));
         services.AddKeyedScoped<IReadingProcessingService, EnergyProcessingService>(nameof(EnergyProcessingService));
-        
+
         services.AddScoped<IMapper<AirQualityReadingDto, AirQualityReadingEntity>, AirQualityReadingToEntityMapper>();
         services.AddScoped<IMapper<MotionReadingDto, MotionReadingEntity>, MotionReadingToEntityMapper>();
         services.AddScoped<IMapper<EnergyReadingDto, EnergyReadingEntity>, EnergyReadingToEntityMapper>();

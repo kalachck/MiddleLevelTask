@@ -31,7 +31,7 @@ const start = async () => {
       path: '/graphql',
     });
 
-    app.get('/health', async () => ({
+    app.get('/health', () => ({
       status: 'ok',
       timestamp: new Date().toISOString(),
     }));
@@ -42,16 +42,18 @@ const start = async () => {
     });
 
     const port = Number(process.env.PORT) || 8080;
-    const host = process.env.HOST || '0.0.0.0';
+    const host = process.env.HOST ?? '0.0.0.0';
 
     await app.listen({ port, host });
 
-    console.log(`
-            API Gateway is ready!
-            GraphQL: http://localhost:${port}/graphql
-            IDE (GraphiQL): http://localhost:${port}/graphiql
-            Health: http://localhost:${port}/health
-        `);
+    app.log.info(
+      {
+        graphql: `http://localhost:${port}/graphql`,
+        graphiql: `http://localhost:${port}/graphiql`,
+        health: `http://localhost:${port}/health`,
+      },
+      'API Gateway is ready',
+    );
   } catch (error) {
     app.log.error(error);
     process.exit(1);

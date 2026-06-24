@@ -4,7 +4,6 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import { AGGREGATE_ENERGY } from '../../graphql/queries';
-import type { EnergyStatsData, QueryVars } from '../../types/sensor';
 import { useSensorNotificationsContext } from '../../signalr/useSensorNotificationsContext';
 import { latestForLocation } from '../../signalr/selectors';
 import { useRefetchOnNotification } from '../../hooks/useRefetchOnNotification';
@@ -23,14 +22,11 @@ const EnergyChart: React.FC<Props> = ({ location, from, to }) => {
     [energyEvents, location],
   );
 
-  const { data, loading, error, refetch } = useQuery<EnergyStatsData, QueryVars>(
-    AGGREGATE_ENERGY,
-    {
-      variables: { location, from, to, interval: '1 minute' },
-      fetchPolicy: 'network-only',
-      nextFetchPolicy: 'cache-first',
-    },
-  );
+  const { data, loading, error, refetch } = useQuery(AGGREGATE_ENERGY, {
+    variables: { location, from, to, interval: '1 minute' },
+    fetchPolicy: 'network-only',
+    nextFetchPolicy: 'cache-first',
+  });
 
   useRefetchOnNotification(energyEvents, location, refetch);
 

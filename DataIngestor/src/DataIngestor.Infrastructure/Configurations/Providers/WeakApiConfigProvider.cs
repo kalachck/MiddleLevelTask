@@ -13,15 +13,15 @@ public interface IWeakApiConfigProvider
 public class WeakApiConfigProvider : IWeakApiConfigProvider
 {
     private readonly WeakApiConfig _config;
-    
+
     public WeakApiConfigProvider(IOptions<WeakApiConfig> options)
     {
         _config = options.Value;
     }
-    
-    public string GetMetersUrl() 
+
+    public string GetMetersUrl()
         => _config.MetersUrl;
 
-    public Dictionary<string, string> GetHeaders() 
+    public Dictionary<string, string> GetHeaders()
         => _config.Headers;
 }

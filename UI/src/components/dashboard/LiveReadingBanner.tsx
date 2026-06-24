@@ -2,8 +2,8 @@ import type { ReactNode } from 'react';
 import { formatReadingTime, isRecentTimestamp } from '../../signalr/selectors';
 
 interface LiveReadingBannerProps {
-  timestamp?: string;
-  children: ReactNode;
+  readonly timestamp?: string;
+  readonly children: ReactNode;
 }
 
 export default function LiveReadingBanner({ timestamp, children }: LiveReadingBannerProps) {

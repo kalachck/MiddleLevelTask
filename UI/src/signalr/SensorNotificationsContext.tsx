@@ -4,7 +4,7 @@ import {
 } from './useSensorNotifications';
 import { SensorNotificationsContext } from './sensorNotificationsContextValue';
 
-export function SensorNotificationsProvider({ children }: { children: ReactNode }) {
+export function SensorNotificationsProvider({ children }: Readonly<{ children: ReactNode }>) {
   const value = useSensorNotifications();
   return (
     <SensorNotificationsContext.Provider value={value}>{children}</SensorNotificationsContext.Provider>

@@ -1,6 +1,12 @@
-import { gql } from '@apollo/client';
+import { gql, type TypedDocumentNode } from '@apollo/client';
+import type {
+  AirQualityData,
+  EnergyStatsData,
+  MotionData,
+  QueryVars,
+} from '../types/sensor';
 
-export const AGGREGATE_AIR_QUALITY = gql`
+export const AGGREGATE_AIR_QUALITY: TypedDocumentNode<AirQualityData, QueryVars> = gql`
   query AggregateAir($location: String!, $from: String!, $to: String!, $interval: String!) {
     aggregateAirQuality(location: $location, from: $from, to: $to, interval: $interval) {
       timeBucket
@@ -12,7 +18,7 @@ export const AGGREGATE_AIR_QUALITY = gql`
   }
 `;
 
-export const AGGREGATE_ENERGY = gql`
+export const AGGREGATE_ENERGY: TypedDocumentNode<EnergyStatsData, QueryVars> = gql`
   query AggregateEnergy($location: String!, $from: String!, $to: String!, $interval: String!) {
     aggregateEnergy(location: $location, from: $from, to: $to, interval: $interval) {
       timeBucket
@@ -23,7 +29,7 @@ export const AGGREGATE_ENERGY = gql`
   }
 `;
 
-export const AGGREGATE_MOTION = gql`
+export const AGGREGATE_MOTION: TypedDocumentNode<MotionData, QueryVars> = gql`
   query AggregateMotion($location: String!, $from: String!, $to: String!, $interval: String!) {
     aggregateMotion(location: $location, from: $from, to: $to, interval: $interval) {
       timeBucket

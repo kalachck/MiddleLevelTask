@@ -33,4 +33,12 @@ export default {
     ],
     coverageDirectory: 'coverage',
     clearMocks: true,
+    coverageThreshold: {
+        global: {
+            statements: 80,
+            branches: 90,
+            functions: 85,
+            lines: 80,
+        },
+    },
 };

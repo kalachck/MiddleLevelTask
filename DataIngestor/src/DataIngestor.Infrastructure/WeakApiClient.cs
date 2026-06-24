@@ -38,7 +38,7 @@ public class WeakApiClient : IWeakApiClient
                 RequestUri = new Uri(metersUrl),
             };
             headers.ToList().ForEach(h => request.Headers.Add(h.Key, h.Value));
-            
+
             var response = await _httpClient.SendAsync(request, ct);
             response.EnsureSuccessStatusCode();
 

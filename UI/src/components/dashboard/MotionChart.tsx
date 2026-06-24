@@ -4,7 +4,6 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import { AGGREGATE_MOTION } from '../../graphql/queries';
-import type { MotionData, QueryVars } from '../../types/sensor';
 import { useSensorNotificationsContext } from '../../signalr/useSensorNotificationsContext';
 import { latestForLocation } from '../../signalr/selectors';
 import { useRefetchOnNotification } from '../../hooks/useRefetchOnNotification';
@@ -23,14 +22,11 @@ const MotionChart: React.FC<Props> = ({ location, from, to }) => {
     [motionEvents, location],
   );
 
-  const { data, loading, error, refetch } = useQuery<MotionData, QueryVars>(
-    AGGREGATE_MOTION,
-    {
-      variables: { location, from, to, interval: '1 minute' },
-      fetchPolicy: 'network-only',
-      nextFetchPolicy: 'cache-first',
-    },
-  );
+  const { data, loading, error, refetch } = useQuery(AGGREGATE_MOTION, {
+    variables: { location, from, to, interval: '1 minute' },
+    fetchPolicy: 'network-only',
+    nextFetchPolicy: 'cache-first',
+  });
 
   useRefetchOnNotification(motionEvents, location, refetch);
 

@@ -14,14 +14,14 @@ public class MotionRepository : IMotionRepository
     {
         _connectionFactory = connectionFactory;
     }
-    
+
     public async Task AddAsync(MotionReadingEntity entity, CancellationToken ct)
     {
         await using var connection = _connectionFactory.CreateConnection();
         await connection.OpenAsync(ct);
 
         const string sql = @"INSERT INTO MotionReadings (Id, Name, MotionDetected, CreatedAt, Timestamp) VALUES (@Id, @Name, @MotionDetected, @CreatedAt, @Timestamp)";
-        
+
         await connection.ExecuteAsync(sql, entity);
     }
 }
