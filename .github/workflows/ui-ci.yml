@@ -7,7 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  build-and-test:
+  lint-build-test:
+    name: Lint, typecheck, build, and test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -30,8 +31,11 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Typecheck
+        run: npm run typecheck
+
       - name: Build application
         run: npm run build
 
-      - name: Run unit tests
-        run: npm test -- --ci --coverage
+      - name: Run unit tests with coverage gate
+        run: npm test -- --ci --coverage --coverageReporters=text-summary

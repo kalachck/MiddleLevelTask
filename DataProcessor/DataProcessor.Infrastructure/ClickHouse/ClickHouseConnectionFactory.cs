@@ -15,7 +15,7 @@ public class ClickHouseConnectionFactory : IClickHouseConnectionFactory
     {
         _configProvider = configProvider;
     }
-    
-    public ClickHouseConnection CreateConnection() 
+
+    public ClickHouseConnection CreateConnection()
         => new(_configProvider.GetConnectionString());
 }

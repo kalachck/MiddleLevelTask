@@ -14,7 +14,7 @@ public class EnergyRepository : IEnergyRepository
     {
         _connectionFactory = connectionFactory;
     }
-    
+
     public async Task AddAsync(EnergyReadingEntity entity, CancellationToken ct)
     {
         await using var connection = _connectionFactory.CreateConnection();

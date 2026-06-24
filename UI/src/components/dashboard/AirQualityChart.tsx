@@ -4,7 +4,6 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import { AGGREGATE_AIR_QUALITY } from '../../graphql/queries';
-import type { AirQualityData, QueryVars } from '../../types/sensor';
 import { useSensorNotificationsContext } from '../../signalr/useSensorNotificationsContext';
 import { latestForLocation } from '../../signalr/selectors';
 import { useRefetchOnNotification } from '../../hooks/useRefetchOnNotification';
@@ -23,14 +22,11 @@ const AirQualityChart: React.FC<Props> = ({ location, from, to }) => {
     [airQualityEvents, location],
   );
 
-  const { data, loading, error, refetch } = useQuery<AirQualityData, QueryVars>(
-    AGGREGATE_AIR_QUALITY,
-    {
-      variables: { location, from, to, interval: '1 minute' },
-      fetchPolicy: 'network-only',
-      nextFetchPolicy: 'cache-first',
-    },
-  );
+  const { data, loading, error, refetch } = useQuery(AGGREGATE_AIR_QUALITY, {
+    variables: { location, from, to, interval: '1 minute' },
+    fetchPolicy: 'network-only',
+    nextFetchPolicy: 'cache-first',
+  });
 
   useRefetchOnNotification(airQualityEvents, location, refetch);
 

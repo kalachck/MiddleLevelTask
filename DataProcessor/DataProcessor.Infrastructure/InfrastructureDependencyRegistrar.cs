@@ -59,7 +59,7 @@ public static class InfrastructureDependencyRegistrar
             sp,
             sp.GetRequiredService<DataProcessorMetrics>(),
             sp.GetRequiredService<ILogger<RabbitMqConsumer<AirQualityProcessingService>>>()));
-        
+
         services.AddSingleton<IRabbitMqConfigProvider, RabbitMqConfigProvider>();
         services.AddSingleton<IRabbitMqChannelProvider, RabbitMqChannelProvider>();
         services.AddSingleton<ISensorNotificationService, RabbitMqNotificationPublisher>();

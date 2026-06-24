@@ -64,7 +64,7 @@ describe('<LiveReadingBanner />', () => {
 
         const timeSpan = container.querySelector('span.text-xs.text-slate-400');
         expect(timeSpan).not.toBeNull();
-        expect(timeSpan!.textContent).not.toBe('—');
-        expect(timeSpan!.textContent!.length).toBeGreaterThan(0);
+        expect(timeSpan?.textContent).not.toBe('—');
+        expect((timeSpan?.textContent?.length ?? 0)).toBeGreaterThan(0);
     });
 });

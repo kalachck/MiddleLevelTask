@@ -14,7 +14,7 @@ public sealed class DataProcessorMetrics
     public DataProcessorMetrics()
     {
         var meter = new Meter(MeterName);
-        
+
         _messagesProcessed = meter.CreateCounter<long>(
             "processor.messages.processed",
             description: "Total number of messages successfully processed");

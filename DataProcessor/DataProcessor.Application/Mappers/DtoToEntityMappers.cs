@@ -6,7 +6,7 @@ namespace DataProcessor.Application.Mappers;
 
 public class AirQualityReadingToEntityMapper : IMapper<AirQualityReadingDto, AirQualityReadingEntity>
 {
-    public AirQualityReadingEntity Map(AirQualityReadingDto input) 
+    public AirQualityReadingEntity Map(AirQualityReadingDto input)
         => new(
             input.Name,
             input.Payload.Co2,
@@ -17,12 +17,12 @@ public class AirQualityReadingToEntityMapper : IMapper<AirQualityReadingDto, Air
 
 public class EnergyReadingToEntityMapper : IMapper<EnergyReadingDto, EnergyReadingEntity>
 {
-    public EnergyReadingEntity Map(EnergyReadingDto input) 
+    public EnergyReadingEntity Map(EnergyReadingDto input)
         => new EnergyReadingEntity(input.Name, input.Payload.Energy, input.Timestamp);
 }
 
 public class MotionReadingToEntityMapper : IMapper<MotionReadingDto, MotionReadingEntity>
 {
-    public MotionReadingEntity Map(MotionReadingDto input) 
+    public MotionReadingEntity Map(MotionReadingDto input)
         => new(input.Name, input.Payload.MotionDetected, input.Timestamp);
 }

@@ -16,7 +16,7 @@ public sealed class IngestionMetrics
     public IngestionMetrics()
     {
         var meter = new Meter(MeterName);
-        
+
         _readingsFetched = meter.CreateCounter<long>(
             name: "ingestor.readings.fetched",
             description: "Total number of readings fetched from the weak API");

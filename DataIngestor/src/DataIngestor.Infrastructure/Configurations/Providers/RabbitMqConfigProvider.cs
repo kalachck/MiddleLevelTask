@@ -11,12 +11,12 @@ public interface IRabbitMqConfigProvider
 public class RabbitMqConfigProvider : IRabbitMqConfigProvider
 {
     private readonly RabbitMqConfig _rabbitMqConfig;
-    
+
     public RabbitMqConfigProvider(IOptions<RabbitMqConfig> options)
     {
         _rabbitMqConfig = options.Value;
     }
-    
-    public RabbitMqConfig GetRabbitMqConfig() 
+
+    public RabbitMqConfig GetRabbitMqConfig()
         => _rabbitMqConfig;
 }

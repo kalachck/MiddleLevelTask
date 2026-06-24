@@ -7,22 +7,31 @@
     "dev": "node --loader ts-node/esm src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
+    "lint": "node ./scripts/lint.mjs",
+    "lint:fix": "node ./scripts/lint.mjs --fix",
+    "typecheck": "tsc --noEmit",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watch",
-    "test:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage"
+    "test:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "validate": "npm run lint && npm run typecheck && npm run build && npm test -- --ci --coverage"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.5.2",
     "cross-env": "^10.1.0",
+    "eslint": "^9.39.4",
+    "eslint-plugin-sonarjs": "^3.0.6",
+    "globals": "^17.4.0",
     "jest": "^30.4.2",
     "ts-jest": "^29.4.11",
     "ts-node": "^10.9.2",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.58.0"
   },
   "dependencies": {
     "@clickhouse/client": "^1.18.2",
