@@ -1,0 +1,49 @@
+name: Notification Service Deploy
+
+on:
+  push:
+    tags:
+      - 'notification-service-tst-*'
+      - 'notification-service-ppd-*'
+      - 'notification-service-prd-*'
+
+env:
+  SERVICE_NAME: notification-service
+  AZURE_RESOURCE_GROUP: rg-sensor-platform
+
+jobs:
+  resolve-environment:
+    uses: ./.github/workflows/reusable-parse-deployment-target.yml
+    with:
+      service_name: notification-service
+      tag_name: ${{ github.ref_name }}
+      environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || '' }}
+      version: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '' }}
+
+  build-image:
+    needs: resolve-environment
+    uses: ./.github/workflows/reusable-azure-container-image.yml
+    with:
+      service_name: notification-service
+      image_tag: ${{ needs.resolve-environment.outputs.image_tag }}
+      docker_context: NotificationService
+      acr_name: acrsensorplatform
+
+  deploy:
+    needs: [resolve-environment, build-image]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.resolve-environment.outputs.environment }}
+    env:
+      DEPLOY_ENV: ${{ needs.resolve-environment.outputs.environment }}
+      DEPLOY_VERSION: ${{ needs.resolve-environment.outputs.version }}
+      IMAGE: ${{ needs.build-image.outputs.image }}
+      AZURE_CONTAINER_APP: ca-sensor-notification-service-${{ needs.resolve-environment.outputs.environment }}
+
+    steps:
+      - name: Deploy to Azure Container Apps
+        run: |
+          echo "Simulating: az containerapp update \\"
+          echo "  --name $AZURE_CONTAINER_APP \\"
+          echo "  --resource-group $AZURE_RESOURCE_GROUP \\"
+          echo "  --image $IMAGE"
+          echo "Deployed $SERVICE_NAME $DEPLOY_VERSION to $DEPLOY_ENV"
