@@ -94,26 +94,55 @@ public class RabbitMqPublisher : IMessagePublisher, IAsyncDisposable
         _connection = await _connectionFactory.CreateConnectionAsync(ct);
         _channel = await _connection.CreateChannelAsync(cancellationToken: ct);
 
+        var deadLetterExchange = _config.DeadLetterExchange ?? $"{_config.ExchangeName}.dlx";
+
         await _channel.ExchangeDeclareAsync(
             exchange: _config.ExchangeName,
             type: ExchangeType.Topic,
             durable: true,
             cancellationToken: ct);
 
+        await _channel.ExchangeDeclareAsync(
+            exchange: deadLetterExchange,
+            type: ExchangeType.Direct,
+            durable: true,
+            cancellationToken: ct);
+
         _logger.LogDebug(
-            "Declared topic exchange {ExchangeName}",
-            _config.ExchangeName);
+            "Declared topic exchange {ExchangeName} and dead-letter exchange {DeadLetterExchange}",
+            _config.ExchangeName,
+            deadLetterExchange);
 
         foreach (var type in _sensorTypes)
         {
             var queueName = $"{_config.QueueName}.{type}";
             var routingKey = $"{_config.RoutingKeyPattern}.{type}";
+            var deadLetterQueue = $"{queueName}.dlq";
+
+            await _channel.QueueDeclareAsync(
+                deadLetterQueue,
+                durable: true,
+                exclusive: false,
+                autoDelete: false,
+                cancellationToken: ct);
+            await _channel.QueueBindAsync(
+                deadLetterQueue,
+                deadLetterExchange,
+                routingKey: deadLetterQueue,
+                cancellationToken: ct);
+
+            var queueArguments = new Dictionary<string, object?>
+            {
+                ["x-dead-letter-exchange"] = deadLetterExchange,
+                ["x-dead-letter-routing-key"] = deadLetterQueue,
+            };
 
             await _channel.QueueDeclareAsync(
                 queueName,
                 durable: true,
                 exclusive: false,
                 autoDelete: false,
+                arguments: queueArguments,
                 cancellationToken: ct);
             await _channel.QueueBindAsync(
                 queueName,
@@ -122,15 +151,17 @@ public class RabbitMqPublisher : IMessagePublisher, IAsyncDisposable
                 cancellationToken: ct);
 
             _logger.LogDebug(
-                "Bound queue {QueueName} to exchange {ExchangeName} with routing key {RoutingKey}",
+                "Bound queue {QueueName} (dead-letter {DeadLetterQueue}) to exchange {ExchangeName} with routing key {RoutingKey}",
                 queueName,
+                deadLetterQueue,
                 _config.ExchangeName,
                 routingKey);
         }
 
         _logger.LogInformation(
-            "RabbitMQ publisher ready (exchange {ExchangeName}, {QueueCount} queues)",
+            "RabbitMQ publisher ready (exchange {ExchangeName}, dead-letter {DeadLetterExchange}, {QueueCount} queues)",
             _config.ExchangeName,
+            deadLetterExchange,
             _sensorTypes.Count);
     }
 }
