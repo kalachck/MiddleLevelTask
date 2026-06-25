@@ -17,4 +17,6 @@ public class NotificationsRabbitMqConfig
     public string QueueName { get; set; } = "notifications_queue";
     public string ExchangeName { get; set; } = "notifications_exchange";
     public string RoutingKeyPattern { get; set; } = "notifications.";
+    public string? DeadLetterExchange { get; set; }
+    public int MaxRetries { get; set; } = 3;
 }

@@ -39,8 +39,12 @@ public static class InfrastructureDependencyRegistrar
 
     private static void AddRabbitMq(this IServiceCollection services)
     {
+        var maxRetries = services.BuildServiceProvider()
+            .GetRequiredService<IRabbitMqConfigProvider>().GetRabbitMqConfig().MaxRetries;
+
         services.AddHostedService(sp => new RabbitMqConsumer<MotionProcessingService>(
             queueName: "sensors_queue.motion",
+            maxRetries: maxRetries,
             channelProvider: sp.GetRequiredService<IRabbitMqChannelProvider>(),
             sp,
             sp.GetRequiredService<DataProcessorMetrics>(),
@@ -48,6 +52,7 @@ public static class InfrastructureDependencyRegistrar
 
         services.AddHostedService(sp => new RabbitMqConsumer<EnergyProcessingService>(
             queueName: "sensors_queue.energy",
+            maxRetries: maxRetries,
             channelProvider: sp.GetRequiredService<IRabbitMqChannelProvider>(),
             sp,
             sp.GetRequiredService<DataProcessorMetrics>(),
@@ -55,6 +60,7 @@ public static class InfrastructureDependencyRegistrar
 
         services.AddHostedService(sp => new RabbitMqConsumer<AirQualityProcessingService>(
             queueName: "sensors_queue.air_quality",
+            maxRetries: maxRetries,
             channelProvider: sp.GetRequiredService<IRabbitMqChannelProvider>(),
             sp,
             sp.GetRequiredService<DataProcessorMetrics>(),

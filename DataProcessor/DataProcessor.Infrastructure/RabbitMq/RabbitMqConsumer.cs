@@ -14,6 +14,7 @@ public class RabbitMqConsumer<TService> : BackgroundService
     where TService : IReadingProcessingService
 {
     private readonly string _queueName;
+    private readonly int _maxRetries;
     private readonly IRabbitMqChannelProvider _channelProvider;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<RabbitMqConsumer<TService>> _logger;
@@ -22,12 +23,14 @@ public class RabbitMqConsumer<TService> : BackgroundService
 
     public RabbitMqConsumer(
         string queueName,
+        int maxRetries,
         IRabbitMqChannelProvider channelProvider,
         IServiceProvider serviceProvider,
         DataProcessorMetrics metrics,
         ILogger<RabbitMqConsumer<TService>> logger)
     {
         _queueName = queueName;
+        _maxRetries = maxRetries;
         _channelProvider = channelProvider;
         _serviceProvider = serviceProvider;
         _metrics = metrics;
@@ -72,14 +75,7 @@ public class RabbitMqConsumer<TService> : BackgroundService
             catch (Exception ex)
             {
                 _metrics.RecordFailed(_queueName);
-
-                _logger.LogError(
-                    ex,
-                    "Failed to process message on queue {QueueName} (delivery tag {DeliveryTag}); message will be requeued",
-                    _queueName,
-                    ea.DeliveryTag);
-
-                await channel.BasicNackAsync(ea.DeliveryTag, false, true, ct);
+                await HandleFailureAsync(channel, ea, ex, ct);
             }
         };
 
@@ -90,10 +86,57 @@ public class RabbitMqConsumer<TService> : BackgroundService
             cancellationToken: ct);
 
         _logger.LogInformation(
-            "RabbitMQ consumer for {ProcessorType} is listening on queue {QueueName}",
+            "RabbitMQ consumer for {ProcessorType} is listening on queue {QueueName} (max retries {MaxRetries})",
             typeof(TService).Name,
-            _queueName);
+            _queueName,
+            _maxRetries);
 
         await Task.Delay(Timeout.Infinite, ct);
+    }
+
+    private async Task HandleFailureAsync(
+        IChannel channel,
+        BasicDeliverEventArgs ea,
+        Exception ex,
+        CancellationToken ct)
+    {
+        var attempt = MessageRetry.GetAttempt(ea.BasicProperties);
+
+        if (attempt < _maxRetries)
+        {
+            var nextAttempt = attempt + 1;
+
+            _logger.LogWarning(
+                ex,
+                "Processing failed on queue {QueueName} (delivery tag {DeliveryTag}); retry {Attempt}/{MaxRetries}",
+                _queueName,
+                ea.DeliveryTag,
+                nextAttempt,
+                _maxRetries);
+
+            var retryProperties = MessageRetry.CreateRetryProperties(ea.BasicProperties, nextAttempt);
+
+            await channel.BasicPublishAsync(
+                exchange: string.Empty,
+                routingKey: _queueName,
+                mandatory: false,
+                basicProperties: retryProperties,
+                body: ea.Body,
+                cancellationToken: ct);
+
+            await channel.BasicAckAsync(ea.DeliveryTag, false, ct);
+            _metrics.RecordRetried(_queueName);
+            return;
+        }
+
+        _logger.LogError(
+            ex,
+            "Processing failed on queue {QueueName} (delivery tag {DeliveryTag}) after {MaxRetries} retries; dead-lettering message",
+            _queueName,
+            ea.DeliveryTag,
+            _maxRetries);
+
+        await channel.BasicNackAsync(ea.DeliveryTag, false, requeue: false, ct);
+        _metrics.RecordDeadLettered(_queueName);
     }
 }

@@ -25,9 +25,13 @@ public static class InfrastructureDependencyRegistrar
         services.AddSingleton<IRabbitMqConfigProvider, RabbitMqConfigProvider>();
         services.AddSingleton<IRabbitMqChannelProvider, RabbitMqChannelProvider>();
 
+        var maxRetries = services.BuildServiceProvider().GetRequiredService<IRabbitMqConfigProvider>()
+            .GetNotificationsConfig().MaxRetries;
+
         services.AddHostedService(sp => new NotificationConsumer<EnergyReadingDto>(
             queueName: $"{configuration["Notifications:QueueName"]}.energy",
             notificationType: "energy",
+            maxRetries: maxRetries,
             channelProvider: sp.GetRequiredService<IRabbitMqChannelProvider>(),
             serviceProvider: sp,
             metrics: sp.GetRequiredService<NotificationMetrics>(),
@@ -36,6 +40,7 @@ public static class InfrastructureDependencyRegistrar
         services.AddHostedService(sp => new NotificationConsumer<MotionReadingDto>(
             queueName: $"{configuration["Notifications:QueueName"]}.motion",
             notificationType: "motion",
+            maxRetries: maxRetries,
             channelProvider: sp.GetRequiredService<IRabbitMqChannelProvider>(),
             serviceProvider: sp,
             metrics: sp.GetRequiredService<NotificationMetrics>(),
@@ -44,6 +49,7 @@ public static class InfrastructureDependencyRegistrar
         services.AddHostedService(sp => new NotificationConsumer<AirQualityReadingDto>(
             queueName: $"{configuration["Notifications:QueueName"]}.air_quality",
             notificationType: "air_quality",
+            maxRetries: maxRetries,
             channelProvider: sp.GetRequiredService<IRabbitMqChannelProvider>(),
             serviceProvider: sp,
             metrics: sp.GetRequiredService<NotificationMetrics>(),
@@ -57,9 +63,17 @@ public static class InfrastructureDependencyRegistrar
         var notifications = configProvider.GetNotificationsConfig();
         var channel = await channelProvider.GetChannel(ct);
 
+        var deadLetterExchange = notifications.DeadLetterExchange ?? $"{notifications.ExchangeName}.dlx";
+
         await channel.ExchangeDeclareAsync(
             exchange: notifications.ExchangeName,
             type: ExchangeType.Topic,
+            durable: true,
+            cancellationToken: ct);
+
+        await channel.ExchangeDeclareAsync(
+            exchange: deadLetterExchange,
+            type: ExchangeType.Direct,
             durable: true,
             cancellationToken: ct);
 
@@ -67,12 +81,33 @@ public static class InfrastructureDependencyRegistrar
         {
             var queueName = $"{notifications.QueueName}.{type}";
             var routingKey = $"{notifications.RoutingKeyPattern}{type}";
+            var deadLetterQueue = $"{queueName}.dlq";
+
+            await channel.QueueDeclareAsync(
+                deadLetterQueue,
+                durable: true,
+                exclusive: false,
+                autoDelete: false,
+                cancellationToken: ct);
+
+            await channel.QueueBindAsync(
+                deadLetterQueue,
+                deadLetterExchange,
+                deadLetterQueue,
+                cancellationToken: ct);
+
+            var queueArguments = new Dictionary<string, object?>
+            {
+                ["x-dead-letter-exchange"] = deadLetterExchange,
+                ["x-dead-letter-routing-key"] = deadLetterQueue,
+            };
 
             await channel.QueueDeclareAsync(
                 queueName,
                 durable: true,
                 exclusive: false,
                 autoDelete: false,
+                arguments: queueArguments,
                 cancellationToken: ct);
 
             await channel.QueueBindAsync(

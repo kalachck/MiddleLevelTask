@@ -16,6 +16,7 @@ public class NotificationConsumer<TDto> : BackgroundService
 {
     private readonly string _queueName;
     private readonly string _notificationType;
+    private readonly int _maxRetries;
     private readonly IRabbitMqChannelProvider _channelProvider;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<NotificationConsumer<TDto>> _logger;
@@ -25,6 +26,7 @@ public class NotificationConsumer<TDto> : BackgroundService
     public NotificationConsumer(
         string queueName,
         string notificationType,
+        int maxRetries,
         IRabbitMqChannelProvider channelProvider,
         IServiceProvider serviceProvider,
         NotificationMetrics metrics,
@@ -32,6 +34,7 @@ public class NotificationConsumer<TDto> : BackgroundService
     {
         _queueName = queueName;
         _notificationType = notificationType;
+        _maxRetries = maxRetries;
         _channelProvider = channelProvider;
         _serviceProvider = serviceProvider;
         _metrics = metrics;
@@ -67,14 +70,7 @@ public class NotificationConsumer<TDto> : BackgroundService
             catch (Exception ex)
             {
                 _metrics.RecordFailed(_notificationType);
-
-                _logger.LogError(
-                    ex,
-                    "Failed to process {NotificationType} notification on queue {QueueName}; message will be requeued",
-                    _notificationType,
-                    _queueName);
-
-                await channel.BasicNackAsync(ea.DeliveryTag, false, true, ct);
+                await HandleFailureAsync(channel, ea, ex, ct);
             }
         };
 
@@ -85,11 +81,58 @@ public class NotificationConsumer<TDto> : BackgroundService
             cancellationToken: ct);
 
         _logger.LogInformation(
-            "Notification consumer for {NotificationType} is listening on queue {QueueName}",
+            "Notification consumer for {NotificationType} is listening on queue {QueueName} (max retries {MaxRetries})",
             _notificationType,
-            _queueName);
+            _queueName,
+            _maxRetries);
 
         await Task.Delay(Timeout.Infinite, ct);
+    }
+
+    private async Task HandleFailureAsync(
+        IChannel channel,
+        BasicDeliverEventArgs ea,
+        Exception ex,
+        CancellationToken ct)
+    {
+        var attempt = MessageRetry.GetAttempt(ea.BasicProperties);
+
+        if (attempt < _maxRetries)
+        {
+            var nextAttempt = attempt + 1;
+
+            _logger.LogWarning(
+                ex,
+                "Failed to process {NotificationType} notification on queue {QueueName}; retry {Attempt}/{MaxRetries}",
+                _notificationType,
+                _queueName,
+                nextAttempt,
+                _maxRetries);
+
+            var retryProperties = MessageRetry.CreateRetryProperties(ea.BasicProperties, nextAttempt);
+
+            await channel.BasicPublishAsync(
+                exchange: string.Empty,
+                routingKey: _queueName,
+                mandatory: false,
+                basicProperties: retryProperties,
+                body: ea.Body,
+                cancellationToken: ct);
+
+            await channel.BasicAckAsync(ea.DeliveryTag, false, ct);
+            _metrics.RecordRetried(_notificationType);
+            return;
+        }
+
+        _logger.LogError(
+            ex,
+            "Failed to process {NotificationType} notification on queue {QueueName} after {MaxRetries} retries; dead-lettering message",
+            _notificationType,
+            _queueName,
+            _maxRetries);
+
+        await channel.BasicNackAsync(ea.DeliveryTag, false, requeue: false, ct);
+        _metrics.RecordDeadLettered(_notificationType);
     }
 
     private Task DispatchAsync(ISensorHubBroadcaster broadcaster, string message, CancellationToken ct)
