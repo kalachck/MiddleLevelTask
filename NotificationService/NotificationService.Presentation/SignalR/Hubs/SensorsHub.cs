@@ -17,7 +17,7 @@ public class SensorsHub : Hub
     public override Task OnConnectedAsync()
     {
         _metrics.RecordConnection("connected");
-        _logger.LogInformation(
+        _logger.LogDebug(
             "SignalR client connected: {ConnectionId}",
             Context.ConnectionId);
         return base.OnConnectedAsync();

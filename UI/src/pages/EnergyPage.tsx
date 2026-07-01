@@ -1,12 +1,9 @@
 import EnergyChart from '../components/dashboard/EnergyChart';
 import { SENSOR_LOCATIONS } from '../constants/locations';
 import { usePageDateRange } from '../hooks/usePageDateRange';
-import { useSensorNotificationsContext } from '../signalr/useSensorNotificationsContext';
 
 const EnergyPage = () => {
   const { from, to } = usePageDateRange('energy');
-  const { energyEvents } = useSensorNotificationsContext();
-  const liveCount = energyEvents.length;
 
   return (
     <div className="space-y-8">
@@ -19,9 +16,6 @@ const EnergyPage = () => {
         </div>
         <div className="text-right text-sm text-slate-500">
           <p>Locations: {SENSOR_LOCATIONS.length}</p>
-          {liveCount > 0 && (
-            <p className="text-emerald-600 font-medium">{liveCount} live events buffered</p>
-          )}
         </div>
       </header>
 

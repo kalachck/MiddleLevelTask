@@ -39,6 +39,7 @@ public static class InfrastructureDependencyRegistrar
 
     private static void AddRabbitMq(this IServiceCollection services)
     {
+        services.AddSingleton<IRabbitMqConfigProvider, RabbitMqConfigProvider>();
         var maxRetries = services.BuildServiceProvider()
             .GetRequiredService<IRabbitMqConfigProvider>().GetRabbitMqConfig().MaxRetries;
 
@@ -66,7 +67,6 @@ public static class InfrastructureDependencyRegistrar
             sp.GetRequiredService<DataProcessorMetrics>(),
             sp.GetRequiredService<ILogger<RabbitMqConsumer<AirQualityProcessingService>>>()));
 
-        services.AddSingleton<IRabbitMqConfigProvider, RabbitMqConfigProvider>();
         services.AddSingleton<IRabbitMqChannelProvider, RabbitMqChannelProvider>();
         services.AddSingleton<ISensorNotificationService, RabbitMqNotificationPublisher>();
     }
