@@ -45,7 +45,6 @@ export function useSensorNotifications(
   useEffect(() => {
     const connection = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl, {
-        // Browsers cannot set custom headers on WebSockets; server reads this as `access_token` query param.
         accessTokenFactory: () => hubKeyRef.current,
       })
       .withAutomaticReconnect()

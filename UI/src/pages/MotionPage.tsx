@@ -1,12 +1,9 @@
 import MotionChart from '../components/dashboard/MotionChart';
 import { SENSOR_LOCATIONS } from '../constants/locations';
 import { usePageDateRange } from '../hooks/usePageDateRange';
-import { useSensorNotificationsContext } from '../signalr/useSensorNotificationsContext';
 
 const MotionPage = () => {
   const { from, to } = usePageDateRange('motion');
-  const { motionEvents } = useSensorNotificationsContext();
-  const liveCount = motionEvents.length;
 
   return (
     <div className="space-y-8">
@@ -21,9 +18,6 @@ const MotionPage = () => {
           <div className="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-bold">
             Total sensors: {SENSOR_LOCATIONS.length}
           </div>
-          {liveCount > 0 && (
-            <p className="mt-1 text-xs text-emerald-600 font-medium">{liveCount} live events</p>
-          )}
         </div>
       </header>
 

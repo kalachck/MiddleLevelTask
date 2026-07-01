@@ -17,6 +17,7 @@ interface Props {
 
 const EnergyChart: React.FC<Props> = ({ location, from, to }) => {
   const { energyEvents } = useSensorNotificationsContext();
+
   const latest = useMemo(
     () => latestForLocation(energyEvents, location),
     [energyEvents, location],
@@ -29,6 +30,34 @@ const EnergyChart: React.FC<Props> = ({ location, from, to }) => {
   });
 
   useRefetchOnNotification(energyEvents, location, refetch);
+
+  const chartData = useMemo(() => {
+    if (!data?.aggregateEnergy) return []
+
+    const formattedDbData = data.aggregateEnergy.map((item) => ({
+      ...item,
+      label: new Date(item.timeBucket).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }));
+
+    if (latest) {
+      const latestTime = new Date(latest.timestamp).getTime();
+      const lastDbTime = formattedDbData.length > 0
+      ? new Date(formattedDbData[formattedDbData.length - 1].timeBucket).getTime()
+      : 0;
+
+      if (latestTime > lastDbTime) {
+        formattedDbData.push({
+          timeBucket: latest.timestamp,
+          totalEnergy: latest.energy,
+          label: new Date(latest.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          avgPower: 0,
+          peakPower: 0
+        })
+      }
+    }
+
+    return formattedDbData;
+  }, [data, latest]);
 
   if (loading && !data) {
     return (
@@ -48,11 +77,6 @@ const EnergyChart: React.FC<Props> = ({ location, from, to }) => {
       </div>
     );
   }
-
-  const chartData = data?.aggregateEnergy.map((item) => ({
-    ...item,
-    label: new Date(item.timeBucket).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-  })) ?? [];
 
   return (
     <div className="p-6 bg-white rounded-2xl shadow-sm border border-slate-200 mb-10">

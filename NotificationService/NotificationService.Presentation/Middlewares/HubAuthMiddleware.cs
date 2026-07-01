@@ -17,9 +17,14 @@ public class HubAuthMiddleware : IMiddleware
         if (context.Request.Path.StartsWithSegments("/hubs"))
         {
             var hubKey = context.Request.Headers["x-hub-key"].ToString();
+
             if (string.IsNullOrWhiteSpace(hubKey))
             {
-                hubKey = context.Request.Query["access_token"].ToString();
+                var authHeader = context.Request.Headers["Authorization"].ToString();
+                if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                {
+                    hubKey = authHeader["Bearer ".Length..].Trim();
+                }
             }
 
             if (string.IsNullOrWhiteSpace(hubKey) || hubKey != _hubKey)

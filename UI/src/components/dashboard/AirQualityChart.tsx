@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import React, { useMemo } from 'react';
 import { useQuery } from '@apollo/client/react';
 import {
@@ -30,6 +31,35 @@ const AirQualityChart: React.FC<Props> = ({ location, from, to }) => {
 
   useRefetchOnNotification(airQualityEvents, location, refetch);
 
+  const chartData = useMemo(() => {
+    if (!data?.aggregateAirQuality) return []
+
+    const formattedDbData = data.aggregateAirQuality.map((item) => ({
+      ...item,
+      label: new Date(item.timeBucket).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }));
+
+    if (latest) {
+      const latestTime = new Date(latest.timestamp).getTime();
+      const lastDbTime = formattedDbData.length > 0
+      ? new Date(formattedDbData[formattedDbData.length - 1].timeBucket).getTime()
+      : 0;
+
+      if (latestTime > lastDbTime) {
+        formattedDbData.push({
+          timeBucket: latest.timestamp,
+          label: new Date(latest.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          avgCo2: latest.co2,
+          avgHumidity: latest.humidity,
+          avgPm25: latest.pm25,
+          maxCo2: latest.co2
+        });
+      }
+    }
+
+    return formattedDbData;
+  }, [data, latest])
+
   if (loading && !data) {
     return (
       <div className="h-72 flex items-center justify-center bg-slate-50 rounded-xl border border-slate-100 animate-pulse">
@@ -45,11 +75,6 @@ const AirQualityChart: React.FC<Props> = ({ location, from, to }) => {
       </div>
     );
   }
-
-  const chartData = data?.aggregateAirQuality.map((item) => ({
-    ...item,
-    label: new Date(item.timeBucket).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-  })) ?? [];
 
   return (
     <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col h-full min-h-[400px]">

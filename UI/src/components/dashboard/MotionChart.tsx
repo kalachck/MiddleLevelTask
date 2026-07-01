@@ -30,6 +30,33 @@ const MotionChart: React.FC<Props> = ({ location, from, to }) => {
 
   useRefetchOnNotification(motionEvents, location, refetch);
 
+  const chartData = useMemo(() => {
+    if (!data?.aggregateMotion) return []
+
+    const formattedDbData = data.aggregateMotion.map((item) => ({
+      ...item,
+      label: new Date(item.timeBucket).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }));
+
+    if (latest) {
+      const latestTime = new Date(latest.timestamp).getTime();
+      const lastDbTime = formattedDbData.length > 0
+      ? new Date(formattedDbData[formattedDbData.length - 1].timeBucket).getTime()
+      : 0;
+
+      if (latestTime > lastDbTime) {
+        formattedDbData.push({
+          timeBucket: latest.timestamp,
+          label: new Date(latest.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          eventCount: latest.motionDetected ? 1 : 0,
+          isConstant: true
+        });
+      }
+    }
+
+    return formattedDbData;
+  }, [data, latest])
+
   if (loading && !data) {
     return (
       <div className="h-72 flex items-center justify-center bg-slate-50 rounded-xl border border-slate-100 animate-pulse">
@@ -45,11 +72,6 @@ const MotionChart: React.FC<Props> = ({ location, from, to }) => {
       </div>
     );
   }
-
-  const chartData = data?.aggregateMotion.map((item) => ({
-    ...item,
-    label: new Date(item.timeBucket).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-  })) ?? [];
 
   return (
     <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200 w-full">
