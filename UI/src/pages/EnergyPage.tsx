@@ -10,9 +10,6 @@ const EnergyPage = () => {
       <header className="flex justify-between items-end">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900">Energy monitoring</h1>
-          <p className="text-slate-500 mt-2">
-            History from GraphQL · real-time updates via SignalR
-          </p>
         </div>
         <div className="text-right text-sm text-slate-500">
           <p>Locations: {SENSOR_LOCATIONS.length}</p>

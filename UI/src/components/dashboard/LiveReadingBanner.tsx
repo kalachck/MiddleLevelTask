@@ -20,7 +20,7 @@ export default function LiveReadingBanner({ timestamp, children }: LiveReadingBa
               LIVE
             </span>
           )}
-          <span className="text-xs text-slate-400">{formatReadingTime(timestamp)}</span>
+          <span className="text-xs text-slate-400"> {formatReadingTime(timestamp)}</span>
         </div>
       </div>
     </div>

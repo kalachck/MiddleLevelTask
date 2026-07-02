@@ -10,9 +10,6 @@ const MotionPage = () => {
       <header className="flex justify-between items-end">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900">Motion sensors</h1>
-          <p className="text-slate-500 mt-2">
-            Activity analysis · live status via SignalR
-          </p>
         </div>
         <div className="text-right">
           <div className="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-bold">

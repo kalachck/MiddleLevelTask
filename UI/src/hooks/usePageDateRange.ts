@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 
 type PageRangePreset = 'energy' | 'airQuality' | 'motion';
 
-/** Stable date ranges per page — GraphQL loads on mount; charts refetch on notifications. */
 export function usePageDateRange(preset: PageRangePreset) {
   return useMemo(() => {
     const to = new Date();

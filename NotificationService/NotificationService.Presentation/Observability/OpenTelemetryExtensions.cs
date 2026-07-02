@@ -6,7 +6,7 @@ namespace NotificationService.Presentation.Observability;
 
 public static class OpenTelemetryExtensions
 {
-    public static IServiceCollection AddObservability(this IServiceCollection services, string serviceName)
+    public static void AddObservability(this IServiceCollection services, string serviceName)
     {
         services.AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService(serviceName))
@@ -19,14 +19,11 @@ public static class OpenTelemetryExtensions
                 .AddPrometheusExporter());
 
         services.AddHealthChecks();
-
-        return services;
     }
 
-    public static WebApplication UseObservability(this WebApplication app)
+    public static void UseObservability(this WebApplication app)
     {
         app.MapPrometheusScrapingEndpoint();
         app.MapHealthChecks("/health");
-        return app;
     }
 }

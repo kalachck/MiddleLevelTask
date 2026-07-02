@@ -18,7 +18,7 @@ public class AirQualityReadingToEntityMapper : IMapper<AirQualityReadingDto, Air
 public class EnergyReadingToEntityMapper : IMapper<EnergyReadingDto, EnergyReadingEntity>
 {
     public EnergyReadingEntity Map(EnergyReadingDto input)
-        => new EnergyReadingEntity(input.Name, input.Payload.Energy, input.Timestamp);
+        => new(input.Name, input.Payload.Energy, input.Timestamp);
 }
 
 public class MotionReadingToEntityMapper : IMapper<MotionReadingDto, MotionReadingEntity>
