@@ -3,18 +3,12 @@ using RabbitMQ.Client;
 
 namespace NotificationService.Infrastructure.RabbitMq;
 
-/// <summary>
-/// Helpers for tracking redelivery attempts of a message through a custom
-/// header so consumers can bound retries before dead-lettering.
-/// </summary>
 internal static class MessageRetry
 {
-    public const string AttemptHeader = "x-retry-attempt";
-
     public static int GetAttempt(IReadOnlyBasicProperties properties)
     {
         if (properties.Headers is null
-            || !properties.Headers.TryGetValue(AttemptHeader, out var raw)
+            || !properties.Headers.TryGetValue(RabbitMqConfig.AttemptHeader, out var raw)
             || raw is null)
         {
             return 0;
@@ -35,7 +29,7 @@ internal static class MessageRetry
             ? new Dictionary<string, object?>()
             : new Dictionary<string, object?>(source.Headers);
 
-        headers[AttemptHeader] = nextAttempt;
+        headers[RabbitMqConfig.AttemptHeader] = nextAttempt;
 
         return new BasicProperties
         {

@@ -87,11 +87,11 @@ const AirQualityChart: React.FC<Props> = ({ location, from, to }) => {
         <LiveReadingBanner timestamp={latest.timestamp}>
           <span>
             <span className="text-slate-500">CO₂ </span>
-            <span className="font-bold text-red-500">{latest.co2} ppm</span>
+            <span className="font-bold text-red-500">{latest.co2} ppm </span>
           </span>
           <span>
             <span className="text-slate-500">PM2.5 </span>
-            <span className="font-bold text-slate-700">{latest.pm25}</span>
+            <span className="font-bold text-slate-700">{latest.pm25} </span>
           </span>
           <span>
             <span className="text-slate-500">Humidity </span>

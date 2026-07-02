@@ -1,4 +1,3 @@
-// Shared query parameter types
 export interface QueryVars {
   location: string;
   from: string;
@@ -6,7 +5,6 @@ export interface QueryVars {
   interval: string;
 }
 
-// Air Quality
 export interface AirQualityStat {
   timeBucket: string;
   avgCo2: number;
@@ -19,7 +17,6 @@ export interface AirQualityData {
   aggregateAirQuality: AirQualityStat[];
 }
 
-// Motion
 export interface MotionStat {
   timeBucket: string;
   eventCount: number;
@@ -30,7 +27,6 @@ export interface MotionData {
   aggregateMotion: MotionStat[];
 }
 
-// Energy aggregation types
 export interface EnergyStat {
   timeBucket: string;
   totalEnergy: number;

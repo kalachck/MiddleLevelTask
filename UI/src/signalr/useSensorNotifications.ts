@@ -13,11 +13,9 @@ const MAX_BUFFER = 200;
 export interface UseSensorNotificationsResult {
   connectionState: signalR.HubConnectionState;
   connectionError: string | null;
-  /** Newest-last batches ( capped ) for inspection / future UI. */
   energyEvents: EnergyProcessedPayload[];
   motionEvents: MotionProcessedPayload[];
   airQualityEvents: AirQualityProcessedPayload[];
-  /** All channels, interleaved in receive order (capped). */
   allEvents: SensorRealtimeEvent[];
 }
 

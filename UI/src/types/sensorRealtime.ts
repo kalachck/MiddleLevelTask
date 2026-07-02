@@ -1,5 +1,3 @@
-/** Payloads match anonymous objects sent from NotificationService SignalR hub (camelCase JSON). */
-
 export interface EnergyProcessedPayload {
   name: string;
   energy: number;

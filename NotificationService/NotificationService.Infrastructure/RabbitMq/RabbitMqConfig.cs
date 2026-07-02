@@ -3,6 +3,7 @@ namespace NotificationService.Infrastructure.RabbitMq;
 public class RabbitMqConfig
 {
     public const string SectionName = "RabbitMq";
+    public const string AttemptHeader = "x-retry-attempt";
 
     public string? HostName { get; set; }
     public int? Port { get; set; }
