@@ -33,11 +33,31 @@ public sealed class ClickHouseInitializer : IClickHouseInitializer
         _logger.LogDebug("Ensured database SensorsReadings exists");
 
         const string createEnergyTableSql =
-            @"CREATE TABLE IF NOT EXISTS SensorsReadings.EnergyReadings (Id UUID, Name String, Energy Decimal(12, 2), CreatedAt DateTime, Timestamp DateTime) ENGINE MergeTree() ORDER BY Id";
+            @"CREATE TABLE IF NOT EXISTS SensorsReadings.EnergyReadings (
+                Id UUID,
+                Name String,
+                Energy Decimal(12, 2),
+                CreatedAt DateTime,
+                Timestamp DateTime)
+                ENGINE MergeTree() ORDER BY (Name, Timestamp);";
         const string createMotionTableSql =
-            @"CREATE TABLE IF NOT EXISTS SensorsReadings.MotionReadings (Id UUID, Name String, MotionDetected Bool, CreatedAt DateTime, Timestamp DateTime) ENGINE MergeTree() ORDER BY Id";
+            @"CREATE TABLE IF NOT EXISTS SensorsReadings.MotionReadings (
+                Id UUID,
+                Name String,
+                MotionDetected Bool,
+                CreatedAt DateTime,
+                Timestamp DateTime)
+                ENGINE MergeTree() ORDER BY (Name, Timestamp)";
         const string createAirQualityTableSql =
-            @"CREATE TABLE IF NOT EXISTS SensorsReadings.AirQualityReadings (Id UUID, Name String, Co2 Int, Pm25 Int, Humidity Int, CreatedAt DateTime, Timestamp DateTime) ENGINE MergeTree() ORDER BY Id";
+            @"CREATE TABLE IF NOT EXISTS SensorsReadings.AirQualityReadings (
+                Id UUID,
+                Name String,
+                Co2 Int,
+                Pm25 Int,
+                Humidity Int,
+                CreatedAt DateTime,
+                Timestamp DateTime)
+                ENGINE MergeTree() ORDER BY (Name, Timestamp)";
 
         await connection.ExecuteAsync(createEnergyTableSql);
         await connection.ExecuteAsync(createMotionTableSql);
