@@ -18,16 +18,17 @@ public class IngestionWorker : BackgroundService
     private readonly TimeSpan _pollingInterval;
 
     public IngestionWorker(
-        IServiceProvider serviceProvider,
+        IWeakApiClient weakApiClient,
+        IMessagePublisher messagePublisher,
         ILogger<IngestionWorker> logger,
         IngestionMetrics metrics,
         IOptions<IngestionOptions> options)
     {
+        _weakApiClient = weakApiClient;
+        _messagePublisher = messagePublisher;
         _logger = logger;
         _metrics = metrics;
         _pollingInterval = options.Value.Interval;
-        _weakApiClient = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IWeakApiClient>();
-        _messagePublisher = serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IMessagePublisher>();
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

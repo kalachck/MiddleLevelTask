@@ -15,9 +15,9 @@ public static class ApplicationDependencyRegistrar
     {
         services.AddSingleton<DataProcessorMetrics>();
 
-        services.AddKeyedScoped<IReadingProcessingService, AirQualityProcessingService>(nameof(AirQualityProcessingService));
-        services.AddKeyedScoped<IReadingProcessingService, MotionProcessingService>(nameof(MotionProcessingService));
-        services.AddKeyedScoped<IReadingProcessingService, EnergyProcessingService>(nameof(EnergyProcessingService));
+        services.AddScoped<IReadingProcessingService, AirQualityProcessingService>();
+        services.AddScoped<IReadingProcessingService, MotionProcessingService>();
+        services.AddScoped<IReadingProcessingService, EnergyProcessingService>();
 
         services.AddScoped<IMapper<AirQualityReadingDto, AirQualityReadingEntity>, AirQualityReadingToEntityMapper>();
         services.AddScoped<IMapper<MotionReadingDto, MotionReadingEntity>, MotionReadingToEntityMapper>();

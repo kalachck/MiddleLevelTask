@@ -16,25 +16,23 @@ public class RabbitMqConsumer<TService> : BackgroundService
     private readonly string _queueName;
     private readonly int _maxRetries;
     private readonly IRabbitMqChannelProvider _channelProvider;
-    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<RabbitMqConsumer<TService>> _logger;
-
+    private readonly IReadingProcessingService _processingService;
     private readonly DataProcessorMetrics _metrics;
 
     public RabbitMqConsumer(
         string queueName,
         int maxRetries,
         IRabbitMqChannelProvider channelProvider,
-        IServiceProvider serviceProvider,
         DataProcessorMetrics metrics,
-        ILogger<RabbitMqConsumer<TService>> logger)
+        ILogger<RabbitMqConsumer<TService>> logger, IReadingProcessingService processingService)
     {
         _queueName = queueName;
         _maxRetries = maxRetries;
         _channelProvider = channelProvider;
-        _serviceProvider = serviceProvider;
         _metrics = metrics;
         _logger = logger;
+        _processingService = processingService;
     }
 
     protected override async Task ExecuteAsync(CancellationToken ct)
@@ -58,11 +56,7 @@ public class RabbitMqConsumer<TService> : BackgroundService
                     ea.DeliveryTag,
                     body.Length);
 
-                using var scope = _serviceProvider.CreateScope();
-                var processingService = scope.ServiceProvider.GetRequiredKeyedService<IReadingProcessingService>(
-                    typeof(TService).Name);
-
-                await processingService.ProcessReading(message, ct);
+                await _processingService.ProcessReading(message, ct);
 
                 await channel.BasicAckAsync(ea.DeliveryTag, false, ct);
                 _metrics.RecordProcessed(_queueName);

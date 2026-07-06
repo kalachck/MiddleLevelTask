@@ -243,13 +243,8 @@ public class IngestionWorkerTests
 
     private TestableIngestionWorker CreateSut(TimeSpan interval)
     {
-        var services = new ServiceCollection();
-        services.AddSingleton(_weakApiClient);
-        services.AddSingleton(_messagePublisher);
-        var serviceProvider = services.BuildServiceProvider();
-
         var options = Options.Create(new IngestionOptions { Interval = interval });
-        return new TestableIngestionWorker(serviceProvider, _logger, _metrics, options);
+        return new TestableIngestionWorker(_weakApiClient, _messagePublisher, _logger, _metrics, options);
     }
 
     private static async Task SafeAwait(Task task)
@@ -267,11 +262,12 @@ public class IngestionWorkerTests
     private sealed class TestableIngestionWorker : IngestionWorker
     {
         public TestableIngestionWorker(
-            IServiceProvider serviceProvider,
+            IWeakApiClient weakApiClient,
+            IMessagePublisher messagePublisher,
             ILogger<IngestionWorker> logger,
             IngestionMetrics metrics,
             IOptions<IngestionOptions> options)
-            : base(serviceProvider, logger, metrics, options)
+            : base(weakApiClient, messagePublisher, logger, metrics, options)
         {
         }
 

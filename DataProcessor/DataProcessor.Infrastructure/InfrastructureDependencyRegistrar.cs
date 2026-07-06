@@ -47,25 +47,25 @@ public static class InfrastructureDependencyRegistrar
             queueName: "sensors_queue.motion",
             maxRetries: maxRetries,
             channelProvider: sp.GetRequiredService<IRabbitMqChannelProvider>(),
-            sp,
             sp.GetRequiredService<DataProcessorMetrics>(),
-            sp.GetRequiredService<ILogger<RabbitMqConsumer<MotionProcessingService>>>()));
+            sp.GetRequiredService<ILogger<RabbitMqConsumer<MotionProcessingService>>>(),
+            sp.GetRequiredService<MotionProcessingService>()));
 
         services.AddHostedService(sp => new RabbitMqConsumer<EnergyProcessingService>(
             queueName: "sensors_queue.energy",
             maxRetries: maxRetries,
             channelProvider: sp.GetRequiredService<IRabbitMqChannelProvider>(),
-            sp,
             sp.GetRequiredService<DataProcessorMetrics>(),
-            sp.GetRequiredService<ILogger<RabbitMqConsumer<EnergyProcessingService>>>()));
+            sp.GetRequiredService<ILogger<RabbitMqConsumer<EnergyProcessingService>>>(),
+            sp.GetRequiredService<EnergyProcessingService>()));
 
         services.AddHostedService(sp => new RabbitMqConsumer<AirQualityProcessingService>(
             queueName: "sensors_queue.air_quality",
             maxRetries: maxRetries,
             channelProvider: sp.GetRequiredService<IRabbitMqChannelProvider>(),
-            sp,
             sp.GetRequiredService<DataProcessorMetrics>(),
-            sp.GetRequiredService<ILogger<RabbitMqConsumer<AirQualityProcessingService>>>()));
+            sp.GetRequiredService<ILogger<RabbitMqConsumer<AirQualityProcessingService>>>(),
+            sp.GetRequiredService<AirQualityProcessingService>()));
 
         services.AddSingleton<IRabbitMqChannelProvider, RabbitMqChannelProvider>();
         services.AddSingleton<ISensorNotificationService, RabbitMqNotificationPublisher>();
@@ -74,11 +74,19 @@ public static class InfrastructureDependencyRegistrar
     private static void AddDatabaseDependencies(this IServiceCollection services)
     {
         services.AddSingleton<IClickHouseConfigProvider, ClickHouseConfigProvider>();
-        services.AddScoped<IClickHouseConnectionFactory, ClickHouseConnectionFactory>();
+        services.AddSingleton<IClickHouseConnectionFactory, ClickHouseConnectionFactory>();
         services.AddScoped<IClickHouseInitializer, ClickHouseInitializer>();
 
-        services.AddScoped<IAirQualityRepository, AirQualityRepository>();
-        services.AddScoped<IMotionRepository, MotionRepository>();
-        services.AddScoped<IEnergyRepository, EnergyRepository>();
+        services.AddSingleton<AirQualityRepository>();
+        services.AddSingleton<IAirQualityRepository>(sp => sp.GetRequiredService<AirQualityRepository>());
+        services.AddHostedService(sp => sp.GetRequiredService<AirQualityRepository>());
+
+        services.AddSingleton<MotionRepository>();
+        services.AddSingleton<IMotionRepository>(sp => sp.GetRequiredService<MotionRepository>());
+        services.AddHostedService(sp => sp.GetRequiredService<MotionRepository>());
+
+        services.AddSingleton<EnergyRepository>();
+        services.AddSingleton<IEnergyRepository>(sp => sp.GetRequiredService<EnergyRepository>());
+        services.AddHostedService(sp => sp.GetRequiredService<EnergyRepository>());
     }
 }
